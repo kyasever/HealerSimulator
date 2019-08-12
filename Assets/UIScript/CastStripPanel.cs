@@ -2,12 +2,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SkillCastPanel : MonoBehaviour
+public class CastStripPanel : MonoBehaviour
 {
     public Character sourceCharacter;
     public KSlider slider;
     public Text nameLabel;
     public Text timeLabel;
+    public KSlider sliderCommonCD;
+
 
     private CanvasGroup canvasGroup;
 
@@ -43,6 +45,7 @@ public class SkillCastPanel : MonoBehaviour
             }
             return;
         }
+        //如果现在已经被隐形了,那么马上显示
         if (!Utils.FloatEqual(canvasGroup.alpha, 1))
         {
             canvasGroup.alpha = 1f;
@@ -52,5 +55,8 @@ public class SkillCastPanel : MonoBehaviour
         timeLabel.text = Utils.GetNString(duringTime, s.CastingInterval);
         slider.Value = duringTime;
         slider.MaxValue = s.CastingInterval;
+
+        sliderCommonCD.Value = c.CommonTime;
+        sliderCommonCD.MaxValue = c.CommonInterval;
     }
 }

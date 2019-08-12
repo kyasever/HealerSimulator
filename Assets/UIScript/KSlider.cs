@@ -20,6 +20,19 @@ public class KSlider : MonoBehaviour
     private float maxValue = 100f;
     public float MaxValue { get { return maxValue; } set { this.maxValue = value; Set(); } }
 
+    public float FillAmount
+    {
+        get
+        {
+            return image.fillAmount;
+        }
+        set
+        {
+            image.fillAmount = value;
+        }
+    }
+     
+
     private void Awake()
     {
     }

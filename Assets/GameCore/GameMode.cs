@@ -90,6 +90,7 @@ namespace HealerSimulator
 
         public Action UpdateEvent;
 
+        public Action UpdatePerSecendEvent;
 
         public void Clear()
         {
@@ -99,31 +100,6 @@ namespace HealerSimulator
             Player = null;
             FocusCharacter = null;
             UpdateEvent = null;
-        }
-
-        /// <summary>
-        /// 创建教学关
-        /// </summary>
-        public void Init()
-        {
-            Boss = Character.CreateNPC("B", "这一个长长长的BOSS", 25000);
-            Boss.HP = 22000;
-
-            TeamCharacters = new List<Character>();
-            TeamCharacters.Add(Character.CreateNPC("远", "粗心的法师", 1650));
-            TeamCharacters.Add(Character.CreateNPC("坦", "平庸的坦克", 2800));
-            TeamCharacters.Add(Character.CreateNPC("近", "鲁莽的斗士", 2200));
-            TeamCharacters.Add(Character.CreateNPC("近", "水晶核心", 6000));
-            Character c= Character.CreateHealer();
-
-            var controller = new PlayerController(c);
-
-
-
-            TeamCharacters.Add(c);
-
-            Player = c;
-            FocusCharacter = Player;
         }
 
         public void InitGame(int difficultyLevel)
@@ -151,7 +127,7 @@ namespace HealerSimulator
 
             //创建BOSS
             int hp = (int)(25000 * (1 + difficultyLevel / 10f));
-            Boss = Character.CreateNPC("B", "这一个长长长的BOSS", hp);
+            Boss = Character.CreateNPC("B", "BOSS", hp);
             Boss.HP = Boss.MaxHP;
             Boss.controller = new BossController(Boss, difficultyLevel);
 

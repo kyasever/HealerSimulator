@@ -9,7 +9,7 @@ public class TeamGridPanel : MonoBehaviour
 {
     public CharacterHUD CharacterHUDPrefeb;
 
-    public List<CharacterHUD> hpBoxList = new List<CharacterHUD>();
+    public List<CharacterHUD> characterHUDList = new List<CharacterHUD>();
 
     private GameMode game = GameMode.Instance;
 
@@ -19,7 +19,7 @@ public class TeamGridPanel : MonoBehaviour
         {
             var hud = CreateCharacterHUD();
             hud.sourceCharacter = c;
-            hpBoxList.Add(hud);
+            characterHUDList.Add(hud);
         }
     }
 

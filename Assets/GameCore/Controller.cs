@@ -26,9 +26,9 @@ namespace HealerSimulator
             game = GameMode.Instance;
             //将自己的Update托管给gamemode,然后场景从gameMode取数据进行更新
             game.UpdateEvent += DefaultUpdate;
+            game.UpdatePerSecendEvent += TickPerSecond;
         }
 
-        protected float tickTime = 0;
 
         public virtual void TickPerSecond()
         {
@@ -49,14 +49,6 @@ namespace HealerSimulator
                 c.controller = null;
                 c = null;
                 return;
-            }
-
-            //驱动每秒事件
-            tickTime -= Time.deltaTime;
-            if (tickTime < 0)
-            {
-                tickTime = 1f;
-                TickPerSecond();
             }
             //驱动每帧事件
             Update();
@@ -203,6 +195,7 @@ namespace HealerSimulator
             {
                 int damage = HitCharacter(s, t);
                 sb.AppendFormat("对{0} | 造成了:{1}伤害", t.CharacterName, damage.ToString());
+                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster , UseSkill = s, Value = -damage });
             }
 
             //进入CD
@@ -231,6 +224,7 @@ namespace HealerSimulator
             //掉血
             int damage = HitCharacter(s, target);
             sb.AppendFormat("对{0} | 造成了:{1}伤害", target.CharacterName, damage.ToString());
+            Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = -damage });
 
             //进入CD
             if (s.CDDefault > 0)
@@ -251,7 +245,15 @@ namespace HealerSimulator
 
         public override void TickPerSecond()
         {
-            GameMode.Instance.Boss.HP -= Random.Range(64, 144);
+            int damage = Random.Range(64, 144);
+            GameMode.Instance.Boss.HP -= damage;
+            Skada.Instance.AddRecord(new SkadaRecord()
+            {
+                Accept = GameMode.Instance.Boss,
+                Source = c,
+                UseSkill = null,
+                Value = -damage
+            });
         }
     }
 
