@@ -14,7 +14,7 @@ namespace HealerSimulator
         /// <summary>
         /// Characer和其Skill是由纯数据组成的,Controller负责操作它们的数据
         /// </summary>
-        protected Character c;
+        public Character c;
         protected GameMode game;
 
         /// <summary>
@@ -26,13 +26,22 @@ namespace HealerSimulator
             game = GameMode.Instance;
             //将自己的Update托管给gamemode,然后场景从gameMode取数据进行更新
             game.UpdateEvent += DefaultUpdate;
-            game.UpdatePerSecendEvent += TickPerSecond;
+            game.UpdatePerSecendEvent += DefaultTickPerSecond;
         }
 
-
+        protected void DefaultTickPerSecond()
+        {
+            if (c == null || !c.IsAlive)
+            {
+                return;
+            }
+            TickPerSecond();
+        }
         public virtual void TickPerSecond()
         {
+
         }
+
 
         protected void DefaultUpdate()
         {
@@ -46,7 +55,6 @@ namespace HealerSimulator
             {
                 game.TeamCharacters.Remove(c);
                 game.DeadCharacters.Add(c);
-                c.controller = null;
                 c = null;
                 return;
             }
@@ -153,15 +161,11 @@ namespace HealerSimulator
         }
     }
 
-    public struct SkillLog
-    {
-        public int damege;
-        public string Log;
-        public SkadaRecord Record;
-    }
 
     public static class SkillCaster
     {
+
+
         /// <summary>
         /// 一个单位受到一个技能的攻击,返回伤害,日后可以改成返回结果
         /// </summary>
@@ -245,6 +249,16 @@ namespace HealerSimulator
 
         public override void TickPerSecond()
         {
+            if (c == null)
+            {
+                return;
+            }
+
+            if (!game.InBattle)
+            {
+                return;
+            }
+
             int damage = Random.Range(64, 144);
             GameMode.Instance.Boss.HP -= damage;
             Skada.Instance.AddRecord(new SkadaRecord()
@@ -263,44 +277,62 @@ namespace HealerSimulator
     public class BossController : Controller
     {
         /// <summary>
-        /// 难度等级每增加10 boss的输出增加1倍
+        /// 由对应的控制器类负责创建对应的角色实例
+        /// 好像又回到了wa的结构
         /// </summary>
-        /// <param name="c"></param>
-        /// <param name="diffcultyLevel"></param>
-        public BossController(Character c, int diffcultyLevel) : base(c)
+        /// <returns></returns>
+        public static BossController CreateBoss(int difficultyLevel)
         {
-            float miuti = (float)System.Math.Sqrt(1 + diffcultyLevel * 0.1);
+            //创建并调整Boss的属性
+            int hp = (int)(25000 * (1 + difficultyLevel / 10f));
+            var c = Character.CreateNPC("B", "BOSS", hp);
+            c.HP = c.MaxHP;
+
+            float miuti = (float)System.Math.Sqrt(1 + difficultyLevel * 0.1);
             c.Speed = miuti;
 
+            //添加并绑定Boss的技能
             c.SkillList = new List<Skill>();
-            var skill = Skill.CreateNormalHitSkill(c, "地震", (int)(30 * miuti), 2f);
+            var skill = SkillFactory.CreateNormalHitSkill(c, "地震", (int)(30 * miuti), 2f);
             skill.CDRelease = 1f;
             skill.OnCastEvent += CastSkill1;
             c.SkillList.Add(skill);
 
-            skill = Skill.CreateNormalHitSkill(c, "重击", (int)(1200 * miuti), 20f);
+            skill = SkillFactory.CreateNormalHitSkill(c, "重击", (int)(1200 * miuti), 20f);
             skill.CDRelease = 10f;
             skill.OnCastEvent += CastSkill2;
             c.SkillList.Add(skill);
 
-            skill = Skill.CreateNormalHitSkill(c, "流火", (int)(450 * miuti), 20f);
+            skill = SkillFactory.CreateNormalHitSkill(c, "流火", (int)(450 * miuti), 20f);
             skill.CDRelease = 20f;
             skill.OnCastEvent += CastSkill3;
             c.SkillList.Add(skill);
 
+            //添加Controller
+            var controller = new BossController(c);
+            return controller;
         }
 
-        private void CastSkill1(Skill s)
+        /// <summary>
+        /// 难度等级每增加10 boss的输出增加1倍
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="diffcultyLevel"></param>
+        public BossController(Character c) : base(c)
+        {
+        }
+
+        private static void CastSkill1(Skill s,GameMode game)
         {
             SkillCaster.CastAOESkill(s, game.TeamCharacters);
         }
 
-        private void CastSkill2(Skill s)
+        private static void CastSkill2(Skill s,GameMode game)
         {
-            SkillCaster.CastSingleSkill(s, GetTank());
+            SkillCaster.CastSingleSkill(s, GetTank(game));
         }
 
-        private void CastSkill3(Skill s)
+        private static void CastSkill3(Skill s,GameMode game)
         {
             List<Character> list = new List<Character>();
             foreach (var c in game.TeamCharacters)
@@ -316,7 +348,7 @@ namespace HealerSimulator
         /// <summary>
         /// 获得一个坦克单位,如果没有,那么打第一个人
         /// </summary>
-        private Character GetTank()
+        private static Character GetTank(GameMode game)
         {
             foreach (var v in game.TeamCharacters)
             {
@@ -335,6 +367,10 @@ namespace HealerSimulator
         //卡cd释放技能
         public override void Update()
         {
+            if(!game.InBattle)
+            {
+                return;
+            }
             if(game.TeamCharacters.Count == 0)
             {
                 return;
@@ -344,7 +380,7 @@ namespace HealerSimulator
                 s.CDRelease -= Time.deltaTime;
                 if (s.CDRelease < 0)
                 {
-                    s.OnCastEvent.Invoke(s);
+                    s.OnCastEvent.Invoke(s,game);
                     s.CDRelease = s.CD;
                 }
 
@@ -366,30 +402,29 @@ namespace HealerSimulator
             GameMode.Instance.UpdateEvent += Update;
         }
 
-        private bool Enable = true;
-
         public void Update()
         {
-            if (!Enable)
+            if (!game.InBattle)
                 return;
             //全死光了
             if(game.TeamCharacters.Count == 0)
             {
                 Debug.Log("游戏结束");
                 ReturnScene();
-                Enable = false;
+                game.InBattle = false;
             }
             else if(!game.Boss.IsAlive)
             {
                 Debug.Log("游戏胜利");
                 ReturnScene();
-                Enable = true;
+                game.InBattle = true;
             }
         }
 
         private void ReturnScene()
         {
             game.Clear();
+            Global.Instance.EndGame();
             //SceneManager.Load(new StartScene(), LoadSceneMode.Single);
         }
     }

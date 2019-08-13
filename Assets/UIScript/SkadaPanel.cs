@@ -37,9 +37,7 @@ public class SkadaPanel : MonoBehaviour
 
     public void Refresh()
     {
-
         var list = Skada.Instance.GetDamageRank();
-        Debug.Log("SKada Refresh" + list.Count.ToString());
         if (list.Count == 0)
         {
             return;

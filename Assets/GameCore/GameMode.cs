@@ -76,8 +76,13 @@ namespace HealerSimulator
 
         private GameMode()
         {
-
         }
+
+        /// <summary>
+        /// 只有当正在战斗中控制器才会进行运作
+        /// </summary>
+        public bool InBattle = false;
+
         public Character Boss;
 
         public Character Player;
@@ -100,10 +105,12 @@ namespace HealerSimulator
             Player = null;
             FocusCharacter = null;
             UpdateEvent = null;
+            UpdatePerSecendEvent = null;
         }
 
         public void InitGame(int difficultyLevel)
         {
+            InBattle = true;
             //创建小队
             TeamCharacters = new List<Character>();
             TeamCharacters.Add(Character.CreateNPC("远", "粗心的法师", 1650));
@@ -116,20 +123,18 @@ namespace HealerSimulator
             {
                 v.HP = v.MaxHP;
                 v.Evasion = 0.7f;
-                v.controller = new NPCController(v);
+                new NPCController(v);
             }
             
             //创建玩家
             Character c = Character.CreateHealer();
             c.Evasion = 1f - difficultyLevel * 0.1f;
-            c.controller = new PlayerController(c);
+            new PlayerController(c);
             TeamCharacters.Add(c);
 
             //创建BOSS
-            int hp = (int)(25000 * (1 + difficultyLevel / 10f));
-            Boss = Character.CreateNPC("B", "BOSS", hp);
-            Boss.HP = Boss.MaxHP;
-            Boss.controller = new BossController(Boss, difficultyLevel);
+            Boss = BossController.CreateBoss(difficultyLevel).c;
+
 
             //创建游戏控制器
             new GameContrtoller();

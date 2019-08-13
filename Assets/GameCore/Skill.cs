@@ -7,29 +7,15 @@ using UnityEngine;
 
 namespace HealerSimulator
 {
-
-    /// <summary>
-    /// 技能类. 考虑使用继承进行扩展. 技能的释放是一个权限很大的函数,它可以获得游戏中的所有的数据并决定该干什么.
-    /// </summary>
-    public class Skill
+    public class SkillFactory
     {
-        public enum SkillType
-        {
-            NomalHeal,
-            MiutiHeal,
-            NomalHit,
-        }
-
-        //技能的种类,这个之后会考虑删除. 然后用多个标准处理函数进行处理
-        public SkillType Type;
 
         #region 静态创建某些特定的Skill,之后考虑移动到别的类里
-        public static Skill CreateNormalHitSkill(Character caster,string name , int atk , float cd)
+        public static Skill CreateNormalHitSkill(Character caster, string name, int atk, float cd)
         {
             Skill s = new Skill()
             {
                 Caster = caster,
-                Type = SkillType.NomalHit,
                 Atk = atk,
                 CDDefault = cd,
                 skillName = name,
@@ -43,7 +29,6 @@ namespace HealerSimulator
             {
                 Key = key,
                 Caster = caster,
-                Type = SkillType.NomalHeal,
                 Atk = 300,
                 CastingDefaultInterval = 3f,
                 MPCost = 30,
@@ -59,7 +44,6 @@ namespace HealerSimulator
             {
                 Key = key,
                 Caster = caster,
-                Type = SkillType.NomalHeal,
                 Atk = 450,
                 CastingDefaultInterval = -1f,
                 MPCost = 200,
@@ -75,7 +59,6 @@ namespace HealerSimulator
             {
                 Key = key,
                 Caster = caster,
-                Type = SkillType.NomalHeal,
                 Atk = 600,
                 CastingDefaultInterval = 3f,
                 MPCost = 150,
@@ -91,7 +74,6 @@ namespace HealerSimulator
             {
                 Key = key,
                 Caster = caster,
-                Type = SkillType.MiutiHeal,
                 Atk = 200,
                 CastingDefaultInterval = 3.5f,
                 MPCost = 150,
@@ -107,7 +89,6 @@ namespace HealerSimulator
             {
                 Key = key,
                 Caster = caster,
-                Type = SkillType.MiutiHeal,
                 CDDefault = 90f,
                 Atk = 1000,
                 CastingDefaultInterval = -1f,
@@ -119,8 +100,16 @@ namespace HealerSimulator
         }
         #endregion
 
+    }
+
+    /// <summary>
+    /// 技能类. 考虑使用继承进行扩展. 技能的释放是一个权限很大的函数,它可以获得游戏中的所有的数据并决定该干什么.
+    /// </summary>
+    public class Skill
+    {
         public string skillName = "技能名";
         public string skillDiscription = "技能效果";
+
         public int Atk = 100;
 
         //技能的绑定按键
@@ -131,12 +120,13 @@ namespace HealerSimulator
 
         /// <summary>
         /// 技能被释放时执行的操作,通常使用静态函数进行托管,特定技能需要编写特定的静态函数进行处理
-        /// 参数1 Skill    代表攻击者  
-        /// 参数2 GameMode 代表被攻击者
+        /// 参数Skill    代表攻击者  
         /// </summary>
-        public Action<Skill> OnCastEvent;
+        public Action<Skill,GameMode> OnCastEvent;
 
-        //技能的MP消耗
+        /// <summary>
+        /// 蓝耗
+        /// </summary>
         public int MPCost = 10;
 
         /// <summary>

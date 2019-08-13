@@ -15,6 +15,11 @@ namespace HealerSimulator
         RangeDPS,
     }
 
+    public static class CharacterFactory
+    {
+
+    }
+
     /// <summary>
     /// 角色类 主要负责处理游戏逻辑和数据,和显示完全脱钩,和Destroy完全脱钩,没有生命周期,只有数据,和处理数据的函数
     /// 不管是什么角色,都有这里面所有的属性,只是处理方式不同.
@@ -63,11 +68,6 @@ namespace HealerSimulator
             c.SkillList.Add(Skill.CreateSkillP5(c, KeyCode.Alpha5));
             return c;
         }
-
-        /// <summary>
-        /// 暂时加一个这个,让Character接受某个Controller的托管
-        /// </summary>
-        public Controller controller;
 
         public TeamDuty Duty = TeamDuty.MeleeDPS;
 

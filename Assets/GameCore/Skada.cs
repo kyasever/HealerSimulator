@@ -101,6 +101,10 @@ namespace HealerSimulator
 
         public SkadaData SafeGet(Character c)
         {
+            if (c == null)
+            {
+                return null;
+            }
             if (!data.ContainsKey(c))
             {
                 data[c] = new SkadaData();

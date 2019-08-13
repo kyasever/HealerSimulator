@@ -1,11 +1,23 @@
 ﻿using HealerSimulator;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 //这个类是GameMode的驱动类. GameMode本身不进入Unity循环. 使用这个进行驱动
-public class GameLoop : MonoBehaviour
+public class Global : MonoBehaviour
 {
+    public static Global Instance;
+
+    static Global()
+    {
+        GameObject go = new GameObject("Global");
+        DontDestroyOnLoad(go);
+        Instance = go.AddComponent<Global>();
+    }
+
+
     private GameMode game;
 
     public int ControllerNum { get => game.UpdateEvent.GetInvocationList().Length; }
@@ -19,7 +31,18 @@ public class GameLoop : MonoBehaviour
     void Awake()
     {
         game = GameMode.Instance;
-        game.InitGame(5);
+    }
+
+
+    public void NewGame(int diff)
+    {
+        game.InitGame(diff);
+        SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
+    }
+
+    public void EndGame()
+    {
+        SceneManager.LoadScene("StartScene", LoadSceneMode.Single);
     }
 
     public float updateTime = 1f;

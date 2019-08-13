@@ -392,7 +392,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0.2890625, y: 0.0234375, z: -0.0390625, w: -1}
+  m_BoundingSphereOverride: {x: 2048.0625, y: 134217730, z: 2.524355e-29, w: 6.3108872e-30}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -511,7 +511,6 @@ GameObject:
   - component: {fileID: 1283922463}
   - component: {fileID: 1283922462}
   - component: {fileID: 1283922461}
-  - component: {fileID: 1283922465}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -604,19 +603,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1283922465
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283922460}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 465816fcafe062e4a8b8ada1d09197c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  updateTime: 1
 --- !u!1 &1333768112
 GameObject:
   m_ObjectHideFlags: 0
