@@ -23,7 +23,7 @@ namespace HealerSimulator
             return s;
         }
 
-        public static Skill CreateSkillP1(Character caster, KeyCode key)
+        public static Skill CreateSkillP1(Character caster, KeyCode key, Action<Skill,GameMode> OnCastActction)
         {
             Skill s = new Skill()
             {
@@ -35,25 +35,28 @@ namespace HealerSimulator
                 skillName = "治疗术",
                 skillDiscription = "慢速而有效的治疗",
             };
+            s.OnCastEvent += OnCastActction;
             return s;
         }
 
-        public static Skill CreateSkillP2(Character caster, KeyCode key)
+        public static Skill CreateSkillP2(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
         {
             Skill s = new Skill()
             {
                 Key = key,
                 Caster = caster,
-                Atk = 450,
+                Atk = 600,
                 CastingDefaultInterval = -1f,
+                CDDefault = 5f,
                 MPCost = 200,
                 skillName = "快速治疗",
-                skillDiscription = "瞬发,高蓝耗,高治疗",
+                skillDiscription = "瞬发,高蓝耗的有效治疗,5sCD",
             };
+            s.OnCastEvent += OnCastActction;
             return s;
         }
 
-        public static Skill CreateSkillP3(Character caster, KeyCode key)
+        public static Skill CreateSkillP3(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
         {
             Skill s = new Skill()
             {
@@ -65,10 +68,11 @@ namespace HealerSimulator
                 skillName = "强效治疗",
                 skillDiscription = "强而有效的单体治疗",
             };
+            s.OnCastEvent += OnCastActction;
             return s;
         }
 
-        public static Skill CreateSkillP4(Character caster, KeyCode key)
+        public static Skill CreateSkillP4(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
         {
             Skill s = new Skill()
             {
@@ -80,22 +84,41 @@ namespace HealerSimulator
                 skillName = "治疗祷言",
                 skillDiscription = "有效的群体治疗",
             };
+            s.OnCastEvent += OnCastActction;
             return s;
         }
 
-        public static Skill CreateSkillP5(Character caster, KeyCode key)
+        public static Skill CreateSkillP5(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
         {
             Skill s = new Skill()
             {
                 Key = key,
                 Caster = caster,
-                CDDefault = 90f,
+                CDDefault = 60f,
                 Atk = 1000,
                 CastingDefaultInterval = -1f,
                 MPCost = 100,
                 skillName = "救赎祷言",
                 skillDiscription = "应急群体治疗",
             };
+            s.OnCastEvent += OnCastActction;
+            return s;
+        }
+
+        public static Skill CreateSkillP6(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
+        {
+            Skill s = new Skill()
+            {
+                Key = key,
+                Caster = caster,
+                CDDefault = 0f,
+                Atk = 500,
+                CastingDefaultInterval = 3f,
+                MPCost = 0,
+                skillName = "圣光之箭",
+                skillDiscription = "对Boss造成中等的单体伤害",
+            };
+            s.OnCastEvent += OnCastActction;
             return s;
         }
         #endregion
@@ -111,6 +134,9 @@ namespace HealerSimulator
         public string skillDiscription = "技能效果";
 
         public int Atk = 100;
+
+        //最终攻击,在攻击判定的第一步,就是将最终攻击同步为攻击,然后计算加成.最后出手
+        public int FinalATK = 100;
 
         //技能的绑定按键
         public KeyCode Key;

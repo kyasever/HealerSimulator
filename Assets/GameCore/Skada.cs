@@ -33,11 +33,9 @@ namespace HealerSimulator
         /// </summary>
         public Skill UseSkill;
         /// <summary>
-        /// 变动的数值
+        /// 变动的数值HP
         /// </summary>
         public int Value;
-
-
     }
 
     /// <summary>
@@ -61,9 +59,15 @@ namespace HealerSimulator
         private Skada() { }
         #endregion
 
-        public Dictionary<Character, SkadaData> data = new Dictionary<Character, SkadaData>();
+        public Dictionary<Character, SkadaData> Data = new Dictionary<Character, SkadaData>();
 
         public List<SkadaRecord> recordList = new List<SkadaRecord>();
+
+        public void Clear()
+        {
+            Data.Clear();
+            recordList.Clear();
+        }
 
         /// <summary>
         /// 获取DPS排行榜
@@ -71,14 +75,15 @@ namespace HealerSimulator
         public List<KeyValuePair<Character, SkadaData>> GetDamageRank()
         {
             List<KeyValuePair<Character, SkadaData>> list = new List<KeyValuePair<Character, SkadaData>>();
-            foreach (var v in data)
+            foreach (var v in Data)
             {
                 list.Add(v);
             }
             //按照造成伤害排序并返回
-            list.Sort((a, b) => { return a.Value.Damage.CompareTo(b.Value.Damage); });
+            list.Sort((a, b) => { return b.Value.Damage.CompareTo(a.Value.Damage); });
             return list;
         }
+
 
         /// <summary>
         /// 添加一条统计信息
@@ -89,27 +94,27 @@ namespace HealerSimulator
             //说明造成的是伤害
             if (record.Value <= 0)
             {
-                SafeGet(record.Source).Damage += record.Value;
-                SafeGet(record.Accept).BeDamaged += record.Value;
+                GetData(record.Source).Damage -= record.Value;
+                GetData(record.Accept).BeDamaged -= record.Value;
             }
             else
             {
-                SafeGet(record.Source).Heal += record.Value;
-                SafeGet(record.Accept).BeHeal += record.Value;
+                GetData(record.Source).Heal += record.Value;
+                GetData(record.Accept).BeHeal += record.Value;
             }
         }
 
-        public SkadaData SafeGet(Character c)
+        public SkadaData GetData(Character c)
         {
             if (c == null)
             {
                 return null;
             }
-            if (!data.ContainsKey(c))
+            if (!Data.ContainsKey(c))
             {
-                data[c] = new SkadaData();
+                Data[c] = new SkadaData();
             }
-            return data[c];
+            return Data[c];
         }
     }
 }

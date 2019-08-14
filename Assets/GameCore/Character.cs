@@ -27,49 +27,12 @@ namespace HealerSimulator
     /// </summary>
     public class Character
     {
-        public static Character CreateNPC(string className, string name, int maxHp)
-        {
-            Character c = new Character()
-            {
-                Stama = (maxHp - 1000) / 20,
-                ClassName = className,
-                CharacterName = name,
-            };
-            return c;
-        }
-
-        /// <summary>
-        /// 使用静态方法创建一个标准玩家控制的角色,这个角色的职业是Paladin
-        /// </summary>
-        /// <returns></returns>
-        public static Character CreateHealer()
-        {
-            Character c = new Character()
-            {
-                //人物的基础属性
-                Stama = 46,
-                Speed = 1.2f,
-                Crit = 0.2f,
-                Inte = 55,
-                Master = 0f,
-                Defense = 0f,
-                MaxAP = 0,
-                ClassName = "奶",
-                CharacterName = "完美的操纵者",
-                Description = "玩家控制单位",
-            };
-            c.HP = c.MaxHP;
-            c.MP = c.MaxMP;
-            c.AP = c.MaxAP;
-            c.SkillList.Add(Skill.CreateSkillP1(c, KeyCode.Alpha1));
-            c.SkillList.Add(Skill.CreateSkillP2(c, KeyCode.Alpha2));
-            c.SkillList.Add(Skill.CreateSkillP3(c, KeyCode.Alpha3));
-            c.SkillList.Add(Skill.CreateSkillP4(c, KeyCode.Alpha4));
-            c.SkillList.Add(Skill.CreateSkillP5(c, KeyCode.Alpha5));
-            return c;
-        }
-
         public TeamDuty Duty = TeamDuty.MeleeDPS;
+
+        public Character()
+        {
+
+        }
 
         /// <summary>
         /// 闪避率,这个值通常取决于这个角色的操作水平,只有可以被闪避的伤害才可以触发闪避效果
@@ -156,11 +119,6 @@ namespace HealerSimulator
         public List<Skill> SkillList = new List<Skill>();
 
         /// <summary>
-        /// 角色职业
-        /// </summary>
-        public string ClassName = "  ";
-
-        /// <summary>
         /// 角色名字
         /// </summary>
         public string CharacterName = " ";
@@ -196,7 +154,7 @@ namespace HealerSimulator
         /// <summary>
         /// 当前最大生命
         /// </summary>
-        public int MaxHP { get { return Stama * 20 + 1000; } }
+        public int MaxHP { get { return Stama * 20 + 1000; }  set { Stama = (value - 1000) / 20; } }
 
         private int mp = 0;
         //第二资源条

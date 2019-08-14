@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace HealerSimulator
@@ -51,7 +49,7 @@ namespace HealerSimulator
             }
 
             //如果检测到控制的人挂了,那么解除关系
-            if(!c.IsAlive)
+            if (!c.IsAlive)
             {
                 game.TeamCharacters.Remove(c);
                 game.DeadCharacters.Add(c);
@@ -75,6 +73,56 @@ namespace HealerSimulator
     /// </summary>
     public class PlayerController : Controller
     {
+        /// <summary>
+        /// 使用静态方法创建一个标准玩家控制的角色,这个角色的职业是Paladin
+        /// </summary>
+        /// <returns></returns>
+        public static Character CreatePlayer(int difficultyLevel)
+        {
+            Character c = new Character()
+            {
+                //人物的基础属性
+                Stama = 46,
+                Speed = 1.2f,
+                Crit = 0.2f,
+                Inte = 55,
+                Master = 0f,
+                Defense = 0f,
+                MaxAP = 0,
+                CharacterName = "完美的操纵者",
+                Description = "玩家控制单位",
+            };
+            c.HP = c.MaxHP;
+            c.MP = c.MaxMP;
+            c.AP = c.MaxAP;
+            c.Evasion = 1.5f - difficultyLevel * 0.1f;
+
+            c.SkillList.Add(SkillFactory.CreateSkillP1(c, KeyCode.Alpha1, CastSingle));
+            c.SkillList.Add(SkillFactory.CreateSkillP2(c, KeyCode.Alpha2, CastSingle));
+            c.SkillList.Add(SkillFactory.CreateSkillP3(c, KeyCode.Alpha3, CastSingle));
+            c.SkillList.Add(SkillFactory.CreateSkillP4(c, KeyCode.Alpha4, CastAOE));
+            c.SkillList.Add(SkillFactory.CreateSkillP5(c, KeyCode.Alpha5, CastAOE));
+            c.SkillList.Add(SkillFactory.CreateSkillP6(c, KeyCode.Alpha6, CastAttackBoss));
+            new PlayerController(c);
+            return c;
+        }
+
+        private static void CastSingle(Skill s, GameMode game)
+        {
+            SkillCaster.HealCharacter(s, game.FocusCharacter);
+        }
+
+        private static void CastAOE(Skill s, GameMode game)
+        {
+            SkillCaster.HealMiutiCharacter(s, game.TeamCharacters);
+        }
+
+        private static void CastAttackBoss(Skill s,GameMode game)
+        {
+            SkillCaster.CastSingleSkill(s, game.Boss);
+        }
+
+
         public PlayerController(Character c) : base(c)
         {
 
@@ -110,11 +158,14 @@ namespace HealerSimulator
                 {
                     //技能出手 如果出手的时候已经死掉了,那么不能出手
                     if (game.FocusCharacter.IsAlive)
-                        game.CastSkill(c.CastingSkill, game.FocusCharacter);
+                    {
+                        c.CastingSkill.OnCastEvent.Invoke(c.CastingSkill, game);
+                    }
+
                     c.CastingSkill = null;
                 }
                 //空格键打断当前施法
-                if (Input.GetKeyDown( KeyCode.Space))
+                if (Input.GetKeyDown(KeyCode.Space))
                 {
                     c.CastingSkill = null;
                 }
@@ -141,7 +192,7 @@ namespace HealerSimulator
                         {
                             c.CastingSkill = null;
                         }
-                        game.CastSkill(s, game.FocusCharacter);
+                        s.OnCastEvent.Invoke(s, game);
                         c.CommonTime = c.CommonInterval;
                     }
                     //读条技能,开始读条
@@ -149,7 +200,9 @@ namespace HealerSimulator
                     {
                         //读条技能不能打断读条技能
                         if (c.IsCasting)
+                        {
                             return;
+                        }
                         //进入公cd
                         c.CommonTime = c.CommonInterval;
                         //开始读条
@@ -165,41 +218,99 @@ namespace HealerSimulator
     public static class SkillCaster
     {
 
-
         /// <summary>
-        /// 一个单位受到一个技能的攻击,返回伤害,日后可以改成返回结果
+        /// 群体治疗
         /// </summary>
-        /// <param name="s">攻击方的技能,日后可以改成一个新的结构体,包含攻击放技能的数据</param>
-        /// <param name="target">防守方的角色目标</param>
-        /// <returns>伤害,日后改成结果结构体</returns>
-        public static int HitCharacter(Skill s, Character target)
+        public static void HealMiutiCharacter(Skill s, List<Character> targets)
         {
-            target.HP -= s.Atk;
-            return s.Atk;
-        }
+            if (targets == null || targets.Count == 0)
+            {
+                return;
+            }
 
-        //加血
-        public static int HealCharacter(Skill s, Character target)
-        {
-            target.HP += s.Atk;
-            return s.Atk;
-        }
-
-        //向目标群体发动攻击
-        public static void CastAOESkill(Skill s, List<Character> target)
-        {
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
 
             //消耗蓝
             s.Caster.MP -= s.MPCost;
 
-            //掉血
-            foreach (var t in target)
+            foreach (Character t in targets)
             {
-                int damage = HitCharacter(s, t);
+                //给目标加血
+                t.HP += s.Atk;
+                sb.AppendFormat(" | 对{0}造成了:{1}治疗效果", t.CharacterName, s.Atk.ToString());
+                //添加一条Skada记录
+                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster, UseSkill = s, Value = s.Atk });
+            }
+
+            if (s.CDDefault > 0)
+            {
+                s.CDRelease = s.CD;
+            }
+
+            //输出记录
+            Debug.Log(sb.ToString());
+        }
+
+        /// <summary>
+        /// 单体治疗
+        /// </summary>
+        public static void HealCharacter(Skill s, Character target)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("{0} 对 {1} 释放了 {2} ", s.Caster.CharacterName, target.CharacterName, s.skillName);
+
+            //消耗蓝
+            s.Caster.MP -= s.MPCost;
+
+            //给目标加血
+            target.HP += s.Atk;
+            sb.AppendFormat(" | 造成了:{0}治疗效果", s.Atk.ToString());
+
+            //添加一条Skada记录
+            Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = s.Atk });
+
+            if (s.CDDefault > 0)
+            {
+                s.CDRelease = s.CD;
+            }
+
+            //输出记录
+            Debug.Log(sb.ToString());
+        }
+
+        public static int AttackSingle(Skill s, Character target)
+        {
+            //掉血
+            int damage = s.Atk;
+            damage = (int)(damage * (1 - target.Defense));
+            target.HP -= damage;
+            return damage;
+        }
+
+        //向目标群体发动攻击 一会改
+        public static void CastAOESkill(Skill s, List<Character> targets)
+        {
+            if (targets.Count == 0)
+            {
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
+
+            //消耗蓝
+            s.Caster.MP -= s.MPCost;
+
+            foreach (Character t in targets)
+            {
+                int damage = AttackSingle(s, t);
                 sb.AppendFormat("对{0} | 造成了:{1}伤害", t.CharacterName, damage.ToString());
-                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster , UseSkill = s, Value = -damage });
+                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster, UseSkill = s, Value = -damage });
             }
 
             //进入CD
@@ -207,15 +318,12 @@ namespace HealerSimulator
             {
                 s.CDRelease = s.CD;
             }
-            //输出结果
-            
-            //Debug.Log(sb.ToString());
         }
 
         //向目标发动单体攻击
         public static void CastSingleSkill(Skill s, Character target)
         {
-            if(target == null)
+            if (target == null)
             {
                 return;
             }
@@ -226,7 +334,7 @@ namespace HealerSimulator
             s.Caster.MP -= s.MPCost;
 
             //掉血
-            int damage = HitCharacter(s, target);
+            int damage = AttackSingle(s, target);
             sb.AppendFormat("对{0} | 造成了:{1}伤害", target.CharacterName, damage.ToString());
             Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = -damage });
 
@@ -243,8 +351,65 @@ namespace HealerSimulator
 
     public class NPCController : Controller
     {
-        public NPCController(Character c) : base(c)
-        { 
+        public enum NPCType
+        {
+            Tank,
+            Mage,
+            Warrior,
+            Saber,
+        }
+
+
+        public static Character CreateNPC(NPCType type)
+        {
+            Character c = new Character();
+            int dps = 100;
+            switch (type)
+            {
+                case NPCType.Tank:
+                    c.Duty = TeamDuty.Tank;
+                    c.CharacterName = "平庸的坦克";
+                    c.Evasion = 0.2f;
+                    c.MaxHP = 3200;
+                    c.Defense = 0.3f;
+                    dps = 50;
+                    break;
+                case NPCType.Mage:
+                    c.Duty = TeamDuty.RangeDPS;
+                    c.CharacterName = "粗心的法师";
+                    c.MaxHP = 1760;
+                    c.Evasion = 0.7f;
+                    c.Defense = 0f;
+                    dps = 150;
+                    break;
+                case NPCType.Warrior:
+                    c.Duty = TeamDuty.MeleeDPS;
+                    c.CharacterName = "鲁莽的斗士";
+                    c.MaxHP = 2500;
+                    c.Evasion = 0.2f;
+                    c.Defense = -0.1f;
+                    dps = 150;
+                    break;
+                case NPCType.Saber:
+                    c.Duty = TeamDuty.MeleeDPS;
+                    c.CharacterName = "可靠的武士";
+                    c.MaxHP = 1800;
+                    c.Evasion = 0.8f;
+                    c.Defense = 0f;
+                    dps = 200;
+                    break;
+                default:
+                    break;
+            }
+            new NPCController(c, dps);
+            return c;
+        }
+
+        public int DPS = 100;
+
+        public NPCController(Character c,int dps) : base(c)
+        {
+            DPS = dps;
         }
 
         public override void TickPerSecond()
@@ -259,7 +424,8 @@ namespace HealerSimulator
                 return;
             }
 
-            int damage = Random.Range(64, 144);
+
+            int damage = (int)Random.Range(DPS * 0.5f,DPS * 1.5f);
             GameMode.Instance.Boss.HP -= damage;
             Skada.Instance.AddRecord(new SkadaRecord()
             {
@@ -285,7 +451,11 @@ namespace HealerSimulator
         {
             //创建并调整Boss的属性
             int hp = (int)(25000 * (1 + difficultyLevel / 10f));
-            var c = Character.CreateNPC("B", "BOSS", hp);
+            Character c = new Character
+            {
+                CharacterName = "BOSS",
+                MaxHP = hp
+            };
             c.HP = c.MaxHP;
 
             float miuti = (float)System.Math.Sqrt(1 + difficultyLevel * 0.1);
@@ -293,23 +463,23 @@ namespace HealerSimulator
 
             //添加并绑定Boss的技能
             c.SkillList = new List<Skill>();
-            var skill = SkillFactory.CreateNormalHitSkill(c, "地震", (int)(30 * miuti), 2f);
+            Skill skill = SkillFactory.CreateNormalHitSkill(c, "地震", (int)(30 * miuti), 2f);
             skill.CDRelease = 1f;
             skill.OnCastEvent += CastSkill1;
             c.SkillList.Add(skill);
 
             skill = SkillFactory.CreateNormalHitSkill(c, "重击", (int)(1200 * miuti), 20f);
-            skill.CDRelease = 10f;
+            skill.CDRelease = skill.CD /2;
             skill.OnCastEvent += CastSkill2;
             c.SkillList.Add(skill);
 
             skill = SkillFactory.CreateNormalHitSkill(c, "流火", (int)(450 * miuti), 20f);
-            skill.CDRelease = 20f;
+            skill.CDRelease = skill.CD;
             skill.OnCastEvent += CastSkill3;
             c.SkillList.Add(skill);
 
             //添加Controller
-            var controller = new BossController(c);
+            BossController controller = new BossController(c);
             return controller;
         }
 
@@ -322,20 +492,20 @@ namespace HealerSimulator
         {
         }
 
-        private static void CastSkill1(Skill s,GameMode game)
+        private static void CastSkill1(Skill s, GameMode game)
         {
             SkillCaster.CastAOESkill(s, game.TeamCharacters);
         }
 
-        private static void CastSkill2(Skill s,GameMode game)
+        private static void CastSkill2(Skill s, GameMode game)
         {
             SkillCaster.CastSingleSkill(s, GetTank(game));
         }
 
-        private static void CastSkill3(Skill s,GameMode game)
+        private static void CastSkill3(Skill s, GameMode game)
         {
             List<Character> list = new List<Character>();
-            foreach (var c in game.TeamCharacters)
+            foreach (Character c in game.TeamCharacters)
             {
                 if (c.CanHit(0f))
                 {
@@ -350,7 +520,7 @@ namespace HealerSimulator
         /// </summary>
         private static Character GetTank(GameMode game)
         {
-            foreach (var v in game.TeamCharacters)
+            foreach (Character v in game.TeamCharacters)
             {
                 if (v.Duty == TeamDuty.Tank)
                 {
@@ -358,29 +528,33 @@ namespace HealerSimulator
                 }
             }
             if (game.TeamCharacters.Count > 0)
+            {
                 return game.TeamCharacters[0];
+            }
             else
+            {
                 return null;
+            }
         }
 
 
         //卡cd释放技能
         public override void Update()
         {
-            if(!game.InBattle)
+            if (!game.InBattle)
             {
                 return;
             }
-            if(game.TeamCharacters.Count == 0)
+            if (game.TeamCharacters.Count == 0)
             {
                 return;
             }
-            foreach (var s in c.SkillList)
+            foreach (Skill s in c.SkillList)
             {
                 s.CDRelease -= Time.deltaTime;
                 if (s.CDRelease < 0)
                 {
-                    s.OnCastEvent.Invoke(s,game);
+                    s.OnCastEvent.Invoke(s, game);
                     s.CDRelease = s.CD;
                 }
 
@@ -405,27 +579,23 @@ namespace HealerSimulator
         public void Update()
         {
             if (!game.InBattle)
+            {
                 return;
+            }
             //全死光了
-            if(game.TeamCharacters.Count == 0)
+            if (game.TeamCharacters.Count == 0)
             {
                 Debug.Log("游戏结束");
-                ReturnScene();
                 game.InBattle = false;
+                MainSceneHolder.Instance.GameEndPanel.gameObject.SetActive(true);
+
             }
-            else if(!game.Boss.IsAlive)
+            else if (!game.Boss.IsAlive)
             {
                 Debug.Log("游戏胜利");
-                ReturnScene();
-                game.InBattle = true;
+                game.InBattle = false;
+                MainSceneHolder.Instance.GameEndPanel.gameObject.SetActive(true);
             }
-        }
-
-        private void ReturnScene()
-        {
-            game.Clear();
-            Global.Instance.EndGame();
-            //SceneManager.Load(new StartScene(), LoadSceneMode.Single);
         }
     }
 }

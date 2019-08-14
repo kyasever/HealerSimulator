@@ -54,7 +54,7 @@ public class SkadaPanel : MonoBehaviour
         {
             skadaHUDs[i].gameObject.SetActive(true);
             skadaHUDs[i].NameLabel.text = p.Key.CharacterName;
-            skadaHUDs[i].AmountLabel.text = (-p.Value.Damage).ToString();
+            skadaHUDs[i].AmountLabel.text = (p.Value.Damage).ToString();
             skadaHUDs[i].Slider.FillAmount = (float)p.Value.Damage / maxData;
             i++;
         }

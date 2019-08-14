@@ -20,17 +20,19 @@ public class Global : MonoBehaviour
 
     private GameMode game;
 
-    public int ControllerNum { get => game.UpdateEvent.GetInvocationList().Length; }
+    public int ControllerNum;
 
-    public int TeamCharacterCount { get => game.TeamCharacters.Count; }
+    public int TeamCharacterCount;
 
-    public int DeathCharacterCount { get => game.DeadCharacters.Count; }
+    public int DeathCharacterCount;
 
 
     // Start is called before the first frame update
     void Awake()
     {
         game = GameMode.Instance;
+        Screen.SetResolution(1024, 768, false);
+        Screen.fullScreen = false;
     }
 
 
@@ -45,11 +47,22 @@ public class Global : MonoBehaviour
         SceneManager.LoadScene("StartScene", LoadSceneMode.Single);
     }
 
-    public float updateTime = 1f;
+
+    private float updateTime = 1f;
 
     // Update is called once per frame
     void Update()
     {
+        if (game.UpdateEvent != null)
+            ControllerNum = game.UpdateEvent.GetInvocationList().Length;
+        else
+            ControllerNum = 0;
+        if(game.TeamCharacters != null)
+            TeamCharacterCount = game.TeamCharacters.Count;
+
+        if (game.InBattle)
+            game.BattleTime += Time.deltaTime;
+
         game.UpdateEvent?.Invoke();
 
         //每秒钟更新一次
