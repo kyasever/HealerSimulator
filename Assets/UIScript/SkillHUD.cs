@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
 {
     public Image Icon;
+    public Text SkillNameLabel;
     public Text KeyTextLabel;
     public Text ReleaseTimeLabel;
     public Text TooltipLeftTopLabel;
@@ -37,7 +38,8 @@ public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
     public void Refresh(Skill s)
     {
         //KeyTextLabel.text = s.Key.ToString();
-        KeyTextLabel.text = s.skillName;
+        SkillNameLabel.text = s.skillName;
+        KeyTextLabel.text = s.Key.ToString();
         TooltipLeftTopLabel.text = s.skillName;
         TooltipRightTopLabel.text = s.MPCost.ToString();
         TooltipBottomLabel.text = s.skillDiscription;
@@ -52,6 +54,12 @@ public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
         {
             ReleaseTimeLabel.gameObject.SetActive(false);
             Icon.fillAmount = 1 - (s.Caster.CommonTime / s.Caster.CommonInterval);
+        }
+        
+        if(!s.CanCast)
+        {
+            ReleaseTimeLabel.gameObject.SetActive(false);
+            Icon.fillAmount = 0;
         }
 
     }

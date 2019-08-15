@@ -16,16 +16,17 @@ public class MPPanel : MonoBehaviour
     private void Start()
     {
         canvasGroup = GetComponent<CanvasGroup>();
-        sourceCharacter = GameMode.Instance.Player;
     }
 
     // Update is called once per frame
     private void Update()
     {
-        if (sourceCharacter != null)
+        if (sourceCharacter == null)
         {
-            Refresh(sourceCharacter);
+            sourceCharacter = GameMode.Instance.Player;
+            return;
         }
+        Refresh(sourceCharacter);
     }
 
     public bool IsInFading = false;

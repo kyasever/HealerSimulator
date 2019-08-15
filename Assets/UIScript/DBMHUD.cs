@@ -4,7 +4,7 @@ using HealerSimulator;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SkadaHUD : MonoBehaviour
+public class DBMHUD : MonoBehaviour
 {
     [HideInInspector]
     public KSlider Slider;
@@ -16,13 +16,6 @@ public class SkadaHUD : MonoBehaviour
         Slider = GetComponent<KSlider>();
     }
 
-    public void RefreshSkada(Skill s)
-    {
-        NameLabel.text = s.skillName;
-        AmountLabel.text = Utils.GetNString(s.CDRelease, s.CD);
-        Slider.FillAmount = (float)s.CDRelease / s.CD;
-    }
-     
     public void RefreshSkill(Skill s)
     {
         NameLabel.text = s.skillName;

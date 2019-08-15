@@ -36,13 +36,11 @@ public class CharacterHUD : MonoBehaviour , IPointerEnterHandler , IPointerExitH
 
     public void Refresh(Character character)
     {
-        nameLabel.text = sourceCharacter.CharacterName;
-        hpLabel.text = Utils.GetNString(sourceCharacter.HP, sourceCharacter.MaxHP);
-        hpSlider.Value = sourceCharacter.HP;
-        hpSlider.MaxValue = sourceCharacter.MaxHP;
+        nameLabel.text = character.CharacterName;
+        hpLabel.text = Utils.GetNString(character.HP, character.MaxHP);
+        hpSlider.Value = character.HP;
+        hpSlider.MaxValue = character.MaxHP;
     }
-
-
 
     public void OnPointerEnter(PointerEventData eventData)
     {

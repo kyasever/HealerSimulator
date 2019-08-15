@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2086084740112077066}
   - component: {fileID: 8673452156206934295}
   - component: {fileID: 2008270351311346397}
+  - component: {fileID: 7609839780081205183}
   m_Layer: 5
   m_Name: DBMPanel
   m_TagString: Untagged
@@ -112,6 +113,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53885bcfc8d39304b875a359e821c2fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SkadaHUDPrefeb: {fileID: 5368317117736650315, guid: 8cf925ec2ba380440a2dac23f097a1b3,
+--- !u!114 &7609839780081205183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2086084740112077071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06627fbef72d2e14180b2f499017cd04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GamePrefeb: {fileID: 6398683704239868492, guid: 3ee0fbb1d36d95b4187ea3abdab827e9,
     type: 3}
-  skadaHUDs: []
+  InitCount: 5
+  ObjPoolSleep: []
+  ObjPoolActive: []
+  PoolNode: {fileID: 0}

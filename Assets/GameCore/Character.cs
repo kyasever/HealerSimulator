@@ -137,6 +137,12 @@ namespace HealerSimulator
             get => hp;
             set
             {
+                if(!IsAlive)
+                {
+                    hp = 0;
+                    return;
+                }
+
                 hp = value;
                 if (hp > MaxHP)
                     hp = MaxHP;
@@ -144,7 +150,6 @@ namespace HealerSimulator
                 {
                     hp = 0;
                     IsAlive = false;
-                    //OnDeath();
                 }
             }
         }

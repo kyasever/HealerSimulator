@@ -7,60 +7,61 @@ using UnityEngine;
 
 namespace HealerSimulator
 {
-    public class SkillFactory
+    public class PlayerSKill
     {
-
-        #region 静态创建某些特定的Skill,之后考虑移动到别的类里
-        public static Skill CreateNormalHitSkill(Character caster, string name, int atk, float cd)
+        private static void CastSingle(Skill s, GameMode game)
         {
-            Skill s = new Skill()
-            {
-                Caster = caster,
-                Atk = atk,
-                CDDefault = cd,
-                skillName = name,
-            };
-            return s;
+            SkillCaster.HealCharacter(s, game.FocusCharacter);
         }
 
-        public static Skill CreateSkillP1(Character caster, KeyCode key, Action<Skill,GameMode> OnCastActction)
+        private static void CastAOE(Skill s, GameMode game)
+        {
+            SkillCaster.HealMiutiCharacter(s, game.TeamCharacters);
+        }
+
+        private static void CastAttackBoss(Skill s, GameMode game)
+        {
+            SkillCaster.CastSingleSkill(s, game.Boss);
+        }
+
+        public static Skill CreateSkillP1(Character caster)
         {
             Skill s = new Skill()
             {
-                Key = key,
+                Key =  KeyCode.Q,
                 Caster = caster,
                 Atk = 300,
-                CastingDefaultInterval = 3f,
+                CastingDefaultInterval = 2.5f,
                 MPCost = 30,
                 skillName = "治疗术",
-                skillDiscription = "慢速而有效的治疗",
+                skillDiscription = "恢复300点HP",
             };
-            s.OnCastEvent += OnCastActction;
+            s.OnCastEvent += CastSingle;
             return s;
         }
 
-        public static Skill CreateSkillP2(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
+        public static Skill CreateSkillP2(Character caster)
         {
             Skill s = new Skill()
             {
-                Key = key,
+                Key = KeyCode.W,
                 Caster = caster,
                 Atk = 600,
                 CastingDefaultInterval = -1f,
-                CDDefault = 5f,
+                CDDefault = 10f,
                 MPCost = 200,
                 skillName = "快速治疗",
-                skillDiscription = "瞬发,高蓝耗的有效治疗,5sCD",
+                skillDiscription = "瞬发,治疗600,并持续恢复",
             };
-            s.OnCastEvent += OnCastActction;
+            s.OnCastEvent += CastSingle;
             return s;
         }
 
-        public static Skill CreateSkillP3(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
+        public static Skill CreateSkillP3(Character caster)
         {
             Skill s = new Skill()
             {
-                Key = key,
+                Key = KeyCode.E,
                 Caster = caster,
                 Atk = 600,
                 CastingDefaultInterval = 3f,
@@ -68,15 +69,15 @@ namespace HealerSimulator
                 skillName = "强效治疗",
                 skillDiscription = "强而有效的单体治疗",
             };
-            s.OnCastEvent += OnCastActction;
+            s.OnCastEvent += CastSingle;
             return s;
         }
 
-        public static Skill CreateSkillP4(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
+        public static Skill CreateSkillP4(Character caster)
         {
             Skill s = new Skill()
             {
-                Key = key,
+                Key = KeyCode.R,
                 Caster = caster,
                 Atk = 200,
                 CastingDefaultInterval = 3.5f,
@@ -84,15 +85,15 @@ namespace HealerSimulator
                 skillName = "治疗祷言",
                 skillDiscription = "有效的群体治疗",
             };
-            s.OnCastEvent += OnCastActction;
+            s.OnCastEvent += CastAOE;
             return s;
         }
 
-        public static Skill CreateSkillP5(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
+        public static Skill CreateSkillP5(Character caster)
         {
             Skill s = new Skill()
             {
-                Key = key,
+                Key =  KeyCode.T,
                 Caster = caster,
                 CDDefault = 60f,
                 Atk = 1000,
@@ -101,15 +102,15 @@ namespace HealerSimulator
                 skillName = "救赎祷言",
                 skillDiscription = "应急群体治疗",
             };
-            s.OnCastEvent += OnCastActction;
+            s.OnCastEvent += CastAOE;
             return s;
         }
 
-        public static Skill CreateSkillP6(Character caster, KeyCode key, Action<Skill, GameMode> OnCastActction)
+        public static Skill CreateSkillP6(Character caster)
         {
             Skill s = new Skill()
             {
-                Key = key,
+                Key =  KeyCode.F,
                 Caster = caster,
                 CDDefault = 0f,
                 Atk = 500,
@@ -118,11 +119,9 @@ namespace HealerSimulator
                 skillName = "圣光之箭",
                 skillDiscription = "对Boss造成中等的单体伤害",
             };
-            s.OnCastEvent += OnCastActction;
+            s.OnCastEvent += CastAttackBoss;
             return s;
         }
-        #endregion
-
     }
 
     /// <summary>
@@ -187,10 +186,6 @@ namespace HealerSimulator
         {
             get
             {
-                if (CDRelease > 0)
-                {
-                    return false;
-                }
                 if (Caster.MP < MPCost)
                 {
                     return false;

@@ -10,9 +10,16 @@ using UnityEngine;
  * 增加面板模块,开始界面和结束界面等.
  * 优化初始化流程和伤害判定流程
  * 增加多种NPC控制器,区分NPC的操作.
+ * 平衡性更新:
  * 给牧师增加了一个攻击技能 可以在低难度打输出.
  * 快速治疗治疗量提升450->600 增加5s cd 救赎祷言CD - 30s
  * 增加BOSS技能流火的攻击力450->600 牧师在10难度下增加50%闪避
+ * 
+ * 1.5版本 第二步
+ * 重新优化面板模块,使用对象池.
+ * 
+ * 
+ * 
  * 
  * TODO: 为了一定那啥考虑,还是把StartScene变成一个面板吧. 跨场景的练习已经到位了,多场景会严重增加调试成本.
  */
@@ -33,6 +40,7 @@ namespace HealerSimulator
 
         private GameMode()
         {
+            Clear();
         }
         #endregion
 
@@ -77,8 +85,7 @@ namespace HealerSimulator
         public void InitGame(int difficultyLevel)
         {
             DifficultyLevel = difficultyLevel;
-
-            InBattle = true;
+            
             //创建小队
             TeamCharacters = new List<Character>();
 

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7006064763304154326}
   - component: {fileID: 7006064763304154327}
   - component: {fileID: 7006064763304154324}
+  - component: {fileID: 3126988742940931612}
   m_Layer: 5
   m_Name: TeamGridPanel
   m_TagString: Untagged
@@ -54,7 +55,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7006064763304154322}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
@@ -112,6 +113,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09c8f17fd24ec8248b79858a41148079, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CharacterHUDPrefeb: {fileID: 2005773073575102781, guid: aca52ca335af00449b11e0368d916ac3,
+  characterHUDList: []
+--- !u!114 &3126988742940931612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7006064763304154322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06627fbef72d2e14180b2f499017cd04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GamePrefeb: {fileID: 2005773073575102769, guid: aca52ca335af00449b11e0368d916ac3,
     type: 3}
-  hpBoxList: []
+  InitCount: 5
+  ObjPoolSleep: []
+  PoolNode: {fileID: 0}

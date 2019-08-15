@@ -6,18 +6,11 @@ using UnityEngine.UI;
 
 public class DBMPanel : MonoBehaviour
 {
-    public GameObject SkadaHUDPrefeb;
+    private ObjectPool pool;
 
-    public List<SkadaHUD> skadaHUDs = new List<SkadaHUD>();
-
-    private void Start()
+    private void Awake()
     {
-        for (int i = 0; i < 10; i++)
-        {
-            var skadaHUD = Instantiate(SkadaHUDPrefeb, transform).GetComponent<SkadaHUD>();
-            skadaHUD.gameObject.SetActive(false);
-            skadaHUDs.Add(skadaHUD);
-        }
+        pool = GetComponent<ObjectPool>();
     }
 
     // Update is called once per frame
@@ -30,21 +23,11 @@ public class DBMPanel : MonoBehaviour
 
     public void Refresh(Character c)
     {
-        var list =c.SkillList;
-        if (list.Count == 0)
+        int count = c.SkillList.Count;
+        List<GameObject> list = pool.GetInstantiate(count);
+        for (int i = 0; i < count; i++)
         {
-            return;
-        }
-
-        int i = 0;
-
-        foreach (var s in list)
-        {
-            skadaHUDs[i].gameObject.SetActive(true);
-            skadaHUDs[i].NameLabel.text = s.skillName;
-            skadaHUDs[i].AmountLabel.text = Utils.GetNString(s.CDRelease, s.CD);
-            skadaHUDs[i].Slider.FillAmount = (float)s.CDRelease / s.CD;
-            i++;
+            list[i].GetComponent<DBMHUD>().RefreshSkill(c.SkillList[i]);
         }
     }
 }

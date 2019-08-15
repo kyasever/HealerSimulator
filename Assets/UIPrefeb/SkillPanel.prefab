@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5557680277767924951}
   - component: {fileID: 5557680277767924953}
   - component: {fileID: 4743278904102565632}
+  - component: {fileID: 418467829351202174}
   m_Layer: 5
   m_Name: SkillPanel
   m_TagString: Untagged
@@ -84,3 +85,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SkillHUDPrefeb: {fileID: 3375342122812913742, guid: bf27ab7ff0af21d46910a02b3f6142db,
     type: 3}
+--- !u!114 &418467829351202174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5557680277767924956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06627fbef72d2e14180b2f499017cd04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GamePrefeb: {fileID: 3375342122812913742, guid: bf27ab7ff0af21d46910a02b3f6142db,
+    type: 3}
+  InitCount: 5
+  ObjPoolSleep: []
+  ObjPoolActive: []
+  PoolNode: {fileID: 0}

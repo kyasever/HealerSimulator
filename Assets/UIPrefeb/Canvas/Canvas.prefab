@@ -86,7 +86,6 @@ GameObject:
   - component: {fileID: 3507558709322573695}
   - component: {fileID: 3507558709322573694}
   - component: {fileID: 3507558709322573693}
-  - component: {fileID: 3507558709322573633}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -183,19 +182,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &3507558709322573633
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3507558709322573692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63599080aa4b94c4fba0c9eae0d013f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GameEndPanel: {fileID: 5654866203826265760}
 --- !u!114 &5879397394327698241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,18 +341,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 1950636637264306930}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5654866203826265760 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6154190287413279826, guid: 7517f62a8e815e34d9a79671b71ef8f2,
-    type: 3}
-  m_PrefabInstance: {fileID: 1950636637264306930}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7e5e028b5fc59e499b357b6495833ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1991451597019621696
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -883,7 +857,7 @@ PrefabInstance:
     - target: {fileID: 4921474257563071895, guid: 520dbf442e076f943875e9370f443224,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -106.7
+      value: -31.1
       objectReference: {fileID: 0}
     - target: {fileID: 4921474257563071895, guid: 520dbf442e076f943875e9370f443224,
         type: 3}
@@ -1008,7 +982,7 @@ PrefabInstance:
     - target: {fileID: 489654170416952346, guid: 48a99683a2adb2d4da7da551eb810bb1,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -141
+      value: -61.5
       objectReference: {fileID: 0}
     - target: {fileID: 489654170416952346, guid: 48a99683a2adb2d4da7da551eb810bb1,
         type: 3}

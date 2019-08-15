@@ -51,7 +51,6 @@ namespace HealerSimulator
             //如果检测到控制的人挂了,那么解除关系
             if (!c.IsAlive)
             {
-                game.TeamCharacters.Remove(c);
                 game.DeadCharacters.Add(c);
                 c = null;
                 return;
@@ -97,31 +96,15 @@ namespace HealerSimulator
             c.AP = c.MaxAP;
             c.Evasion = 1.5f - difficultyLevel * 0.1f;
 
-            c.SkillList.Add(SkillFactory.CreateSkillP1(c, KeyCode.Alpha1, CastSingle));
-            c.SkillList.Add(SkillFactory.CreateSkillP2(c, KeyCode.Alpha2, CastSingle));
-            c.SkillList.Add(SkillFactory.CreateSkillP3(c, KeyCode.Alpha3, CastSingle));
-            c.SkillList.Add(SkillFactory.CreateSkillP4(c, KeyCode.Alpha4, CastAOE));
-            c.SkillList.Add(SkillFactory.CreateSkillP5(c, KeyCode.Alpha5, CastAOE));
-            c.SkillList.Add(SkillFactory.CreateSkillP6(c, KeyCode.Alpha6, CastAttackBoss));
+            c.SkillList.Add(PlayerSKill.CreateSkillP1(c));
+            c.SkillList.Add(PlayerSKill.CreateSkillP2(c));
+            c.SkillList.Add(PlayerSKill.CreateSkillP3(c));
+            c.SkillList.Add(PlayerSKill.CreateSkillP4(c));
+            c.SkillList.Add(PlayerSKill.CreateSkillP5(c));
+            c.SkillList.Add(PlayerSKill.CreateSkillP6(c));
             new PlayerController(c);
             return c;
         }
-
-        private static void CastSingle(Skill s, GameMode game)
-        {
-            SkillCaster.HealCharacter(s, game.FocusCharacter);
-        }
-
-        private static void CastAOE(Skill s, GameMode game)
-        {
-            SkillCaster.HealMiutiCharacter(s, game.TeamCharacters);
-        }
-
-        private static void CastAttackBoss(Skill s,GameMode game)
-        {
-            SkillCaster.CastSingleSkill(s, game.Boss);
-        }
-
 
         public PlayerController(Character c) : base(c)
         {
@@ -214,140 +197,6 @@ namespace HealerSimulator
         }
     }
 
-
-    public static class SkillCaster
-    {
-
-        /// <summary>
-        /// 群体治疗
-        /// </summary>
-        public static void HealMiutiCharacter(Skill s, List<Character> targets)
-        {
-            if (targets == null || targets.Count == 0)
-            {
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            foreach (Character t in targets)
-            {
-                //给目标加血
-                t.HP += s.Atk;
-                sb.AppendFormat(" | 对{0}造成了:{1}治疗效果", t.CharacterName, s.Atk.ToString());
-                //添加一条Skada记录
-                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster, UseSkill = s, Value = s.Atk });
-            }
-
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-
-            //输出记录
-            Debug.Log(sb.ToString());
-        }
-
-        /// <summary>
-        /// 单体治疗
-        /// </summary>
-        public static void HealCharacter(Skill s, Character target)
-        {
-            if (target == null || !target.IsAlive)
-            {
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 对 {1} 释放了 {2} ", s.Caster.CharacterName, target.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            //给目标加血
-            target.HP += s.Atk;
-            sb.AppendFormat(" | 造成了:{0}治疗效果", s.Atk.ToString());
-
-            //添加一条Skada记录
-            Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = s.Atk });
-
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-
-            //输出记录
-            Debug.Log(sb.ToString());
-        }
-
-        public static int AttackSingle(Skill s, Character target)
-        {
-            //掉血
-            int damage = s.Atk;
-            damage = (int)(damage * (1 - target.Defense));
-            target.HP -= damage;
-            return damage;
-        }
-
-        //向目标群体发动攻击 一会改
-        public static void CastAOESkill(Skill s, List<Character> targets)
-        {
-            if (targets.Count == 0)
-            {
-                return;
-            }
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            foreach (Character t in targets)
-            {
-                int damage = AttackSingle(s, t);
-                sb.AppendFormat("对{0} | 造成了:{1}伤害", t.CharacterName, damage.ToString());
-                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster, UseSkill = s, Value = -damage });
-            }
-
-            //进入CD
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-        }
-
-        //向目标发动单体攻击
-        public static void CastSingleSkill(Skill s, Character target)
-        {
-            if (target == null)
-            {
-                return;
-            }
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            //掉血
-            int damage = AttackSingle(s, target);
-            sb.AppendFormat("对{0} | 造成了:{1}伤害", target.CharacterName, damage.ToString());
-            Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = -damage });
-
-            //进入CD
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-            //输出结果
-            Debug.Log(sb.ToString());
-        }
-
-    }
 
     public class NPCController : Controller
     {
@@ -442,6 +291,18 @@ namespace HealerSimulator
     /// </summary>
     public class BossController : Controller
     {
+        public static Skill CreateNormalHitSkill(Character caster, string name, int atk, float cd)
+        {
+            Skill s = new Skill()
+            {
+                Caster = caster,
+                Atk = atk,
+                CDDefault = cd,
+                skillName = name,
+            };
+            return s;
+        }
+
         /// <summary>
         /// 由对应的控制器类负责创建对应的角色实例
         /// 好像又回到了wa的结构
@@ -463,17 +324,17 @@ namespace HealerSimulator
 
             //添加并绑定Boss的技能
             c.SkillList = new List<Skill>();
-            Skill skill = SkillFactory.CreateNormalHitSkill(c, "地震", (int)(30 * miuti), 2f);
+            Skill skill = CreateNormalHitSkill(c, "地震", (int)(30 * miuti), 2f);
             skill.CDRelease = 1f;
             skill.OnCastEvent += CastSkill1;
             c.SkillList.Add(skill);
 
-            skill = SkillFactory.CreateNormalHitSkill(c, "重击", (int)(1200 * miuti), 20f);
+            skill = CreateNormalHitSkill(c, "重击", (int)(1200 * miuti), 20f);
             skill.CDRelease = skill.CD /2;
             skill.OnCastEvent += CastSkill2;
             c.SkillList.Add(skill);
 
-            skill = SkillFactory.CreateNormalHitSkill(c, "流火", (int)(450 * miuti), 20f);
+            skill = CreateNormalHitSkill(c, "流火", (int)(450 * miuti), 20f);
             skill.CDRelease = skill.CD;
             skill.OnCastEvent += CastSkill3;
             c.SkillList.Add(skill);
@@ -583,18 +444,17 @@ namespace HealerSimulator
                 return;
             }
             //全死光了
-            if (game.TeamCharacters.Count == 0)
+            if (game.TeamCharacters.Count == game.DeadCharacters.Count)
             {
                 Debug.Log("游戏结束");
                 game.InBattle = false;
-                MainSceneHolder.Instance.GameEndPanel.gameObject.SetActive(true);
-
+                Global.Instance.GameEndPanel.gameObject.SetActive(true);
             }
             else if (!game.Boss.IsAlive)
             {
                 Debug.Log("游戏胜利");
                 game.InBattle = false;
-                MainSceneHolder.Instance.GameEndPanel.gameObject.SetActive(true);
+                Global.Instance.GameEndPanel.gameObject.SetActive(true);
             }
         }
     }

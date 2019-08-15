@@ -7,26 +7,22 @@ using System.Text;
 
 public class TeamGridPanel : MonoBehaviour
 {
-    public CharacterHUD CharacterHUDPrefeb;
-
-    public List<CharacterHUD> characterHUDList = new List<CharacterHUD>();
+    private ObjectPool pool;
 
     private GameMode game = GameMode.Instance;
 
     void Start()
     {
-        foreach (var c in game.TeamCharacters)
+        pool = GetComponent<ObjectPool>();
+    }
+
+    private void Update()
+    {
+        int count = game.TeamCharacters.Count;
+        List<GameObject> list = pool.GetInstantiate(count);
+        for(int i = 0;i<count;i++)
         {
-            var hud = CreateCharacterHUD();
-            hud.sourceCharacter = c;
-            characterHUDList.Add(hud);
+            list[i].GetComponent<CharacterHUD>().sourceCharacter = game.TeamCharacters[i];
         }
     }
-
-    public CharacterHUD CreateCharacterHUD()
-    {
-        var obj = Instantiate(CharacterHUDPrefeb, transform);
-        return obj.GetComponent<CharacterHUD>();
-    }
-
 }

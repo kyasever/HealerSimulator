@@ -22,6 +22,10 @@ public class BossHPPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(sourceCharacter == null)
+        {
+            sourceCharacter = GameMode.Instance.Boss;
+        }
         if(sourceCharacter != null)
         {
             Refresh(sourceCharacter);
