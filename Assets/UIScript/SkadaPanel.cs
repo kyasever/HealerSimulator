@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//这个比较特殊,它是每秒钟更新一次.所以不绑定任何数据
 public class SkadaPanel : MonoBehaviour
 {
     private ObjectPool pool;

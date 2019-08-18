@@ -56,6 +56,30 @@ public static class Utils
         group.alpha = alpha;
     }
 
+    /// <summary>
+    /// 使用的时候注意使用协程调用,直接调不行,渐变
+    /// StartConasjf(Fade)
+    /// </summary>
+    public static IEnumerator FadeAndUp(CanvasGroup group, float alpha, float duration,float upPosition,ObjectPool sourcePool)
+    {
+        float time = 0.0f;
+        float originalAlpha = 1f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+
+            if(time > duration)
+            {
+                sourcePool.ReturnInstantiate(group.gameObject);
+            }
+            group.transform.localPosition = new Vector3(0, Mathf.Lerp(0, upPosition, time / duration),0);
+            group.alpha = Mathf.Lerp(originalAlpha, alpha, time / duration);
+            yield return new WaitForEndOfFrame();
+        }
+
+        group.alpha = alpha;
+    }
+
     public static bool FloatEqual(float a , float b)
     {
         return  Mathf.Abs(a-b) < 0.00001f;

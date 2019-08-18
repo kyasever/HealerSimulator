@@ -4,6 +4,9 @@ using HealerSimulator;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 这个绑定的是一条skada数据,不属于绑定核心方法
+/// </summary>
 public class SkadaHUD : MonoBehaviour
 {
     [HideInInspector]

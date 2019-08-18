@@ -127,8 +127,18 @@ namespace HealerSimulator
     /// <summary>
     /// 技能类. 考虑使用继承进行扩展. 技能的释放是一个权限很大的函数,它可以获得游戏中的所有的数据并决定该干什么.
     /// </summary>
-    public class Skill
+    public class Skill : IDataBinding
     {
+        public List<Action> OnChangeEvent { get; set; } = new List<Action>();
+
+        public void PropChanged()
+        {
+            foreach (var a in OnChangeEvent)
+            {
+                a.Invoke();
+            }
+        }
+
         public string skillName = "技能名";
         public string skillDiscription = "技能效果";
 
@@ -164,15 +174,17 @@ namespace HealerSimulator
         /// </summary>
         public float CD { get => CDDefault / Caster.Speed; }
 
+        private float cdRelease = -1f;
         /// <summary>
         /// 剩余CD 小于0表示冷却好了
         /// </summary>
-        public float CDRelease = -1;
+        public float CDRelease { get { return cdRelease; } set { PropChanged(); cdRelease = value; } }
 
+        private float castingRelease = -1f;
         /// <summary>
         /// 剩余施法时间
         /// </summary>
-        public float CastingRelease = -1f;
+        public float CastingRelease { get { return castingRelease; } set { PropChanged(); castingRelease = value; } }
 
         /// <summary>
         /// 默认施法时间,负数表示为瞬发技能

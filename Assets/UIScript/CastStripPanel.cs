@@ -2,40 +2,42 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 这个同样不适合触发式,改成轮询
+/// </summary>
 public class CastStripPanel : MonoBehaviour
 {
-    public Character sourceCharacter;
     public KSlider slider;
     public Text nameLabel;
     public Text timeLabel;
     public KSlider sliderCommonCD;
-
-
     private CanvasGroup canvasGroup;
 
-    // Start is called before the first frame update
+
+    private GameMode game;
+
     private void Start()
     {
         canvasGroup = GetComponent<CanvasGroup>();
-        
-    }
 
-    // Update is called once per frame
-    private void Update()
-    {
-        if(sourceCharacter == null)
-        {
-            sourceCharacter = GameMode.Instance.Player;
-            return;
-        }
-        Refresh(sourceCharacter);
+        game = GameMode.Instance;
     }
 
     public bool IsInFading = false;
 
-
-    public void Refresh(Character c)
+    private void Update()
     {
+        Character c = game.Player;
+        if(c == null)
+        {
+            //如果条读完了,那么不改变字符,渐隐藏起来
+            if (Utils.FloatEqual(canvasGroup.alpha, 1))
+            {
+                slider.Value = slider.MaxValue;
+                StartCoroutine(Utils.Fade(canvasGroup, 0f, 1f));
+            }
+            return;
+        }
         Skill s = c.CastingSkill;
         if (s == null)
         {

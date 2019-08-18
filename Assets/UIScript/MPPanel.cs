@@ -2,38 +2,29 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MPPanel : MonoBehaviour
+public class MPPanel : DataBinding<Character>
 {
-    public Character sourceCharacter;
+    private GameMode game;
+
     public KSlider slider;
     public Text leftLabel;
     public Text rightLabel;
-
-
     private CanvasGroup canvasGroup;
 
     // Start is called before the first frame update
     private void Start()
     {
-        canvasGroup = GetComponent<CanvasGroup>();
-    }
+        game = GameMode.Instance;
+        game.OnChangeEvent.Add(()=> { Binding(game.Player); });
 
-    // Update is called once per frame
-    private void Update()
-    {
-        if (sourceCharacter == null)
-        {
-            sourceCharacter = GameMode.Instance.Player;
-            return;
-        }
-        Refresh(sourceCharacter);
+        canvasGroup = GetComponent<CanvasGroup>();
     }
 
     public bool IsInFading = false;
 
-
-    public void Refresh(Character c)
+    public override void Refresh()
     {
+        Character c = sourceData;
         if (c == null)
         {
             leftLabel.text = "空缺";

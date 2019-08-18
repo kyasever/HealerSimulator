@@ -8,26 +8,23 @@ public class DBMPanel : MonoBehaviour
 {
     private ObjectPool pool;
 
-    private void Awake()
+    private GameMode game;
+
+    private void Start()
     {
+        game = GameMode.Instance;
+        game.OnChangeEvent.Add(Refresh);
+
         pool = GetComponent<ObjectPool>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Refresh()
     {
-        if (GameMode.Instance.Boss == null)
-            return;
-        Refresh(GameMode.Instance.Boss);
-    }
-
-    public void Refresh(Character c)
-    {
-        int count = c.SkillList.Count;
+        int count = game.Boss.SkillList.Count;
         List<GameObject> list = pool.GetInstantiate(count);
         for (int i = 0; i < count; i++)
         {
-            list[i].GetComponent<DBMHUD>().RefreshSkill(c.SkillList[i]);
+            list[i].GetComponent<DBMHUD>().Binding(game.Boss.SkillList[i]);
         }
     }
 }

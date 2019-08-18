@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
+public class SkillHUD : DataBinding<Skill>,IPointerEnterHandler,IPointerExitHandler
 {
     public Image Icon;
     public Text SkillNameLabel;
@@ -17,8 +17,6 @@ public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
 
     public CanvasGroup TooltipCanvas;
 
-    public Skill sourceSkill;
-
     void Start()
     {
         TooltipCanvas.alpha = 0f;
@@ -27,7 +25,6 @@ public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         StartCoroutine(Utils.Fade(TooltipCanvas, 1.0f, 0.5f));
-
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -35,8 +32,9 @@ public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
         StartCoroutine(Utils.Fade(TooltipCanvas, 0f, 0.5f));
     }
 
-    public void Refresh(Skill s)
+    public override void Refresh()
     {
+        Skill s = sourceData;
         //KeyTextLabel.text = s.Key.ToString();
         SkillNameLabel.text = s.skillName;
         KeyTextLabel.text = s.Key.ToString();
@@ -62,14 +60,5 @@ public class SkillHUD : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler
             Icon.fillAmount = 0;
         }
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (sourceSkill != null)
-        {
-            Refresh(sourceSkill);
-        }
     }
 }

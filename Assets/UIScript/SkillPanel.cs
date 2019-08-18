@@ -6,37 +6,32 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class SkillPanel : MonoBehaviour
+public class SkillPanel : DataBinding<Character>
 {
-    public Character sourceCharacter;
+    private GameMode game;
+    
+    //public Character sourceCharacter;
 
     private ObjectPool pool;
 
     // Start is called before the first frame update
     void Start()
     {
+        game = GameMode.Instance;
+        game.OnChangeEvent.Add(()=> { Binding(game.Player); });
+
         pool = GetComponent<ObjectPool>();
-
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (sourceCharacter == null)
-        {
-            sourceCharacter = GameMode.Instance.Player;
-            return;
-        }
-        Refresh();
-    }
 
-    private void Refresh()
+    public override void Refresh()
     {
-        int count = sourceCharacter.SkillList.Count;
+        Character c = sourceData;
+        int count = c.SkillList.Count;
         List<GameObject> list = pool.GetInstantiate(count);
         for (int i = 0; i < count; i++)
         {
-            list[i].GetComponent<SkillHUD>().sourceSkill = sourceCharacter.SkillList[i];
+            list[i].GetComponent<SkillHUD>().Binding(c.SkillList[i]);
         }
     }
 }

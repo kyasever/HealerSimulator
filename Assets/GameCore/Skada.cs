@@ -18,7 +18,7 @@ namespace HealerSimulator
     /// <summary>
     /// 一条消息记录的构成
     /// </summary>
-    public struct SkadaRecord
+    public class SkadaRecord
     {
         /// <summary>
         /// 变动的来源
@@ -90,6 +90,9 @@ namespace HealerSimulator
         /// </summary>
         public void AddRecord(SkadaRecord record)
         {
+            record.Accept.BehitRecord = record;
+            record.Accept.PropChanged();
+
             recordList.Add(record);
             //说明造成的是伤害
             if (record.Value <= 0)

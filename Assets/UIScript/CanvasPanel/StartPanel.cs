@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class StartSceneLogic : MonoBehaviour
+public class StartPanel : MonoBehaviour
 {
     public Dropdown Dropdown;
     public InputField Field;

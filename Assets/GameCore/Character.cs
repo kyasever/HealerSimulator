@@ -15,18 +15,38 @@ namespace HealerSimulator
         RangeDPS,
     }
 
-    public static class CharacterFactory
+    public interface IDataBinding
     {
-
+        List<Action> OnChangeEvent { get; set; }
+        void PropChanged();
     }
+
 
     /// <summary>
     /// 角色类 主要负责处理游戏逻辑和数据,和显示完全脱钩,和Destroy完全脱钩,没有生命周期,只有数据,和处理数据的函数
     /// 不管是什么角色,都有这里面所有的属性,只是处理方式不同.
     /// hpmax = 1000 + sta * 20 mpmax = 500 + int * 30
     /// </summary>
-    public class Character
+    public class Character : IDataBinding
     {
+        /// <summary>
+        /// 当角色产生变化的时候触发通知
+        /// </summary>
+        public List<Action> OnChangeEvent { get; set; } = new List<Action>();
+
+        public void PropChanged()
+        {
+            foreach(var a in OnChangeEvent)
+            {
+                a.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// 上一条记录,被攻击了添加记录并PropChange
+        /// </summary>
+        public SkadaRecord BehitRecord;
+
         public TeamDuty Duty = TeamDuty.MeleeDPS;
 
         public Character()
@@ -93,10 +113,11 @@ namespace HealerSimulator
         /// </summary>
         public float Defense = 0f;
 
+        private Skill castringSkill = null;
         /// <summary>
         /// 当前正在释放的法术,为null说明当前没有正在释放法术
         /// </summary>
-        public Skill CastingSkill = null;
+        public Skill CastingSkill { get { return castringSkill; } set { castringSkill = value; PropChanged(); } }
 
         /// <summary>
         /// 当开始施法时,只有空格可以打断施法.
@@ -108,10 +129,11 @@ namespace HealerSimulator
         /// </summary>
         public float CommonInterval { get { return 1.5f / Speed; } }
 
+        private float commonTime = -1f;
         /// <summary>
         /// 公cd剩余时间
         /// </summary>
-        public float CommonTime = 1f;
+        public float CommonTime { get { return commonTime; }set { commonTime = value; PropChanged(); } }
 
         /// <summary>
         /// 保存对应键位对应的技能
@@ -140,6 +162,7 @@ namespace HealerSimulator
                 if(!IsAlive)
                 {
                     hp = 0;
+                    PropChanged();
                     return;
                 }
 
@@ -151,6 +174,7 @@ namespace HealerSimulator
                     hp = 0;
                     IsAlive = false;
                 }
+                PropChanged();
             }
         }
 
@@ -159,7 +183,7 @@ namespace HealerSimulator
         /// <summary>
         /// 当前最大生命
         /// </summary>
-        public int MaxHP { get { return Stama * 20 + 1000; }  set { Stama = (value - 1000) / 20; } }
+        public int MaxHP { get { return Stama * 20 + 1000; }  set { Stama = (value - 1000) / 20; PropChanged(); } }
 
         private int mp = 0;
         //第二资源条
@@ -175,6 +199,7 @@ namespace HealerSimulator
                 {
                     mp = 0;
                 }
+                PropChanged();
             }
         }
         public int MaxMP { get { return Inte * 30 + 500; } }
@@ -201,6 +226,24 @@ namespace HealerSimulator
         public float ReleaseTime = 0f;
 
         public string Description = "";
+
+        //当被挂上的时候触发一次
+        public void OnAdd()
+        {
+
+        }
+        //每秒结算的时候触发一次
+        public void PerSecond()
+        {
+
+        }
+        //当结束的时候触发一次
+        public void OnEnd()
+        {
+
+        }
+
+
     }
 
 }

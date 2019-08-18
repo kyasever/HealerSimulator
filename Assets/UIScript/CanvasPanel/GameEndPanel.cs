@@ -18,7 +18,7 @@ public class GameEndPanel : MonoBehaviour
 
     public Dictionary<string, string> Data;
 
-    public void Refresh()
+    public void DisplayGameEndPanel()
     {
         if (game.Boss.HP == 0)
             labelUp.text = "游戏胜利";
@@ -69,7 +69,7 @@ public class GameEndPanel : MonoBehaviour
     {
         game = GameMode.Instance;
         button.onClick.AddListener(ReturnScene);
-        Refresh();
+        DisplayGameEndPanel();
     }
 
     // Update is called once per frame
