@@ -7,112 +7,15 @@ using UnityEngine;
 
 namespace HealerSimulator
 {
+    /// <summary>
+    /// 这个类负责结算一般意义的一个技能对某些目标的标准释放模型.
+    /// 包含消耗结算,CD结算等等
+    /// </summary>
     public static class SkillCaster
     {
-
         /// <summary>
-        /// 群体治疗
+        /// 向目标发动单体技能
         /// </summary>
-        public static void HealMiutiCharacter(Skill s, List<Character> targets)
-        {
-            if (targets == null || targets.Count == 0)
-            {
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            foreach (Character t in targets)
-            {
-                //给目标加血
-                t.HP += s.Atk;
-                sb.AppendFormat(" | 对{0}造成了:{1}治疗效果", t.CharacterName, s.Atk.ToString());
-                //添加一条Skada记录
-                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster, UseSkill = s, Value = s.Atk });
-            }
-
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-
-            //输出记录
-            Debug.Log(sb.ToString());
-        }
-
-        /// <summary>
-        /// 单体治疗
-        /// </summary>
-        public static void HealCharacter(Skill s, Character target)
-        {
-            if (target == null || !target.IsAlive)
-            {
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 对 {1} 释放了 {2} ", s.Caster.CharacterName, target.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            //给目标加血
-            target.HP += s.Atk;
-            sb.AppendFormat(" | 造成了:{0}治疗效果", s.Atk.ToString());
-
-            //添加一条Skada记录
-            Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = s.Atk });
-
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-
-            //输出记录
-            Debug.Log(sb.ToString());
-        }
-
-        public static int AttackSingle(Skill s, Character target)
-        {
-            //掉血
-            int damage = s.Atk;
-            damage = (int)(damage * (1 - target.Defense));
-            target.HP -= damage;
-            return damage;
-        }
-
-        //向目标群体发动攻击 一会改
-        public static void CastAOESkill(Skill s, List<Character> targets)
-        {
-            if (targets.Count == 0)
-            {
-                return;
-            }
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
-
-            //消耗蓝
-            s.Caster.MP -= s.MPCost;
-
-            foreach (Character t in targets)
-            {
-                int damage = AttackSingle(s, t);
-                sb.AppendFormat("对{0} | 造成了:{1}伤害", t.CharacterName, damage.ToString());
-                Skada.Instance.AddRecord(new SkadaRecord() { Accept = t, Source = s.Caster, UseSkill = s, Value = -damage });
-            }
-
-            //进入CD
-            if (s.CDDefault > 0)
-            {
-                s.CDRelease = s.CD;
-            }
-        }
-
-        //向目标发动单体攻击
         public static void CastSingleSkill(Skill s, Character target)
         {
             if (target == null)
@@ -125,10 +28,8 @@ namespace HealerSimulator
             //消耗蓝
             s.Caster.MP -= s.MPCost;
 
-            //掉血
-            int damage = AttackSingle(s, target);
-            sb.AppendFormat("对{0} | 造成了:{1}伤害", target.CharacterName, damage.ToString());
-            Skada.Instance.AddRecord(new SkadaRecord() { Accept = target, Source = s.Caster, UseSkill = s, Value = -damage });
+            //将Skill 转换为SkillInstance 进行下一步结算
+            SkillCalculater.AttackSingle(s.CreateInstance(target));
 
             //进入CD
             if (s.CDDefault > 0)
@@ -139,6 +40,101 @@ namespace HealerSimulator
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>
+        /// 向目标群体发动技能
+        /// </summary>
+        public static void CastMultiSkill(Skill s, List<Character> targets)
+        {
+            if (targets.Count == 0)
+            {
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
+
+            //消耗蓝
+            s.Caster.MP -= s.MPCost;
+
+            //将Skill 转换为SkillInstance 进行下一步结算
+            foreach (var target in targets)
+            {
+                SkillCalculater.AttackSingle(s.CreateInstance(target));
+            }
+
+            //进入CD
+            if (s.CDDefault > 0)
+            {
+                s.CDRelease = s.CD;
+            }
+            //输出结果
+            Debug.Log(sb.ToString());
+        }
     }
+
+
+    /// <summary>
+    /// 这个类中的方法负责结算SkillInstance类型的Skill 
+    /// 包含BUFF加成,减伤,击中结算
+    /// </summary>
+    public static class SkillCalculater
+    {
+        public static void AttackSingle(SkillInstance s)
+        {
+            //计算攻击者的BUFF增伤
+            foreach(BUFF v in s.Caster.Buffs)
+            {
+                v.OnAttack(s);
+            }
+
+            //计算爆击翻倍
+            if(s.Caster.CanCrit())
+            {
+                s.Value = s.Value * 2; 
+            }
+
+            //当造成的是伤害的时候 结算减伤
+            if (s.Value < 0)
+            {
+                s.Value = (int)(s.Value * (1 - s.Target.Defense));
+            }
+
+            //计算被攻击者的BUFF减伤
+            foreach(BUFF v in s.Target.Buffs)
+            {
+                v.OnBeHit(s);
+            }
+
+            //结算伤害
+            s.Target.HP += s.Value;
+
+            OutResult(s);
+
+        }
+
+        public static Skill FindSkill(int id)
+        {
+            return Skill.ID_SKill[id];
+        }
+
+        public static void OutResult(SkillInstance s)
+        {
+            Skill skill = FindSkill(s.ID);
+            Skada.Instance.AddRecord(new SkadaRecord() { Accept = s.Target, Source = s.Caster, UseSkill = skill, Value = s.Value });
+            if(skill.DebugOutLevel == Skill.DebugType.DebugLog)
+            {
+                StringBuilder sb = new StringBuilder();
+                if (s.Value <= 0)
+                {
+                    sb.AppendFormat("{0} 释放了 {1} 对 {2} 造成了:{3}伤害", s.Caster.CharacterName, skill.skillName, s.Target.CharacterName, s.Value.ToString());
+                }
+                else
+                {
+                    sb.AppendFormat("{0} 释放了 {1} 对 {2} 造成了:{3}治疗", s.Caster.CharacterName, skill.skillName, s.Target.CharacterName, s.Value.ToString());
+                }
+                Debug.Log(sb.ToString());
+            }
+        }
+    }
+
 
 }

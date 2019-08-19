@@ -1,42 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace HealerSimulator
 {
-    public class PlayerSKill
+    public class SkillBuilder
     {
-        private static void CastSingle(Skill s, GameMode game)
+        #region 技能释放逻辑
+        private static void CastToFocus(Skill s, GameMode game)
         {
-            SkillCaster.HealCharacter(s, game.FocusCharacter);
+            SkillCaster.CastSingleSkill(s, game.FocusCharacter);
         }
 
-        private static void CastAOE(Skill s, GameMode game)
+        private static void CastToTeam(Skill s, GameMode game)
         {
-            SkillCaster.HealMiutiCharacter(s, game.TeamCharacters);
+            SkillCaster.CastMultiSkill(s, game.TeamCharacters);
         }
 
-        private static void CastAttackBoss(Skill s, GameMode game)
+        private static void CastToBoss(Skill s, GameMode game)
         {
             SkillCaster.CastSingleSkill(s, game.Boss);
         }
+        #endregion
 
+        #region Player
         public static Skill CreateSkillP1(Character caster)
         {
             Skill s = new Skill()
             {
-                Key =  KeyCode.Q,
+                Key = KeyCode.Q,
                 Caster = caster,
-                Atk = 300,
+                Power = 300,
                 CastingDefaultInterval = 2.5f,
                 MPCost = 30,
                 skillName = "治疗术",
                 skillDiscription = "恢复300点HP",
             };
-            s.OnCastEvent += CastSingle;
+            s.CastSctipt += CastToFocus;
             return s;
         }
 
@@ -46,14 +46,14 @@ namespace HealerSimulator
             {
                 Key = KeyCode.W,
                 Caster = caster,
-                Atk = 600,
+                Power = 600,
                 CastingDefaultInterval = -1f,
                 CDDefault = 10f,
                 MPCost = 200,
                 skillName = "快速治疗",
                 skillDiscription = "瞬发,治疗600,并持续恢复",
             };
-            s.OnCastEvent += CastSingle;
+            s.CastSctipt += CastToFocus;
             return s;
         }
 
@@ -63,13 +63,13 @@ namespace HealerSimulator
             {
                 Key = KeyCode.E,
                 Caster = caster,
-                Atk = 600,
+                Power = 600,
                 CastingDefaultInterval = 3f,
                 MPCost = 150,
                 skillName = "强效治疗",
                 skillDiscription = "强而有效的单体治疗",
             };
-            s.OnCastEvent += CastSingle;
+            s.CastSctipt += CastToFocus;
             return s;
         }
 
@@ -79,13 +79,13 @@ namespace HealerSimulator
             {
                 Key = KeyCode.R,
                 Caster = caster,
-                Atk = 200,
+                Power = 200,
                 CastingDefaultInterval = 3.5f,
                 MPCost = 150,
                 skillName = "治疗祷言",
                 skillDiscription = "有效的群体治疗",
             };
-            s.OnCastEvent += CastAOE;
+            s.CastSctipt += CastToTeam;
             return s;
         }
 
@@ -93,16 +93,16 @@ namespace HealerSimulator
         {
             Skill s = new Skill()
             {
-                Key =  KeyCode.T,
+                Key = KeyCode.T,
                 Caster = caster,
                 CDDefault = 60f,
-                Atk = 1000,
+                Power = 1000,
                 CastingDefaultInterval = -1f,
                 MPCost = 100,
                 skillName = "救赎祷言",
                 skillDiscription = "应急群体治疗",
             };
-            s.OnCastEvent += CastAOE;
+            s.CastSctipt += CastToTeam;
             return s;
         }
 
@@ -110,18 +110,60 @@ namespace HealerSimulator
         {
             Skill s = new Skill()
             {
-                Key =  KeyCode.F,
+                Key = KeyCode.F,
                 Caster = caster,
                 CDDefault = 0f,
-                Atk = 500,
+                Power = -500,
                 CastingDefaultInterval = 3f,
                 MPCost = 0,
                 skillName = "圣光之箭",
                 skillDiscription = "对Boss造成中等的单体伤害",
             };
-            s.OnCastEvent += CastAttackBoss;
+            s.CastSctipt += CastToBoss;
             return s;
         }
+        #endregion
+
+        #region NPC
+
+        public static Skill CreateSkillNPC1(Character caster,float cd)
+        {
+            Skill s = new Skill()
+            {
+                Caster = caster,
+                Power = -1,
+                CDDefault = cd,
+                CDRelease = 0.1f,
+                skillName = caster.CharacterName + "的攻击",
+                skillDiscription = "造成伤害",
+            };
+            s.CastSctipt += CastToBoss;
+            return s;
+        }
+        #endregion
+    }
+
+    /// <summary>
+    /// 技能被打出去之后就变成了SkillInstace,这个技能只参与加成与结算.不参与cd等
+    /// </summary>
+    public class SkillInstance
+    {
+
+        public SkillInstance(Skill s,Character target)
+        {
+            ID = s.ID;
+            Value = s.Power;
+            Caster = s.Caster;
+            this.Target = target;
+        }
+
+        public int Value;
+
+        public Character Caster;
+
+        public Character Target;
+
+        public int ID;
     }
 
     /// <summary>
@@ -129,11 +171,32 @@ namespace HealerSimulator
     /// </summary>
     public class Skill : IDataBinding
     {
+        public enum DebugType
+        {
+            DebugLog = 1,
+            None = 2,
+        }
+        /// <summary>
+        /// 输出优先级,优先级低的向日志输出,优先级高的向Debug输出
+        /// </summary>
+        public DebugType DebugOutLevel = DebugType.DebugLog;
+
+        public static int GlobalID = 0;
+        public static List<Skill> ID_SKill = new List<Skill>();
+        public int ID = 1;
+        //每被创建一次 ID都会自增
+        public Skill()
+        {
+            ID = GlobalID;
+            ID_SKill.Add(this);
+            GlobalID++;
+        }
+
         public List<Action> OnChangeEvent { get; set; } = new List<Action>();
 
         public void PropChanged()
         {
-            foreach (var a in OnChangeEvent)
+            foreach (Action a in OnChangeEvent)
             {
                 a.Invoke();
             }
@@ -142,22 +205,39 @@ namespace HealerSimulator
         public string skillName = "技能名";
         public string skillDiscription = "技能效果";
 
-        public int Atk = 100;
+        /// <summary>
+        /// 和伤害还是治疗无关,单纯的为正就是加血 为负就是减血
+        /// </summary>
+        public int Power = -100;
 
-        //最终攻击,在攻击判定的第一步,就是将最终攻击同步为攻击,然后计算加成.最后出手
-        public int FinalATK = 100;
-
-        //技能的绑定按键
+        /// <summary>
+        /// 绑定按键
+        /// </summary>
         public KeyCode Key;
 
-        //这个技能的释放者
+        /// <summary>
+        /// 这个技能的释放者
+        /// </summary>
         public Character Caster;
 
         /// <summary>
         /// 技能被释放时执行的操作,通常使用静态函数进行托管,特定技能需要编写特定的静态函数进行处理
         /// 参数Skill    代表攻击者  
         /// </summary>
-        public Action<Skill,GameMode> OnCastEvent;
+        public Action<Skill, GameMode> CastSctipt;
+
+        /// <summary>
+        /// 不太好... CastSctipt?.Invoke(this,GameMode.Instance);
+        /// </summary>
+        public void Cast()
+        {
+            CastSctipt?.Invoke(this,GameMode.Instance);
+        }
+
+        public SkillInstance CreateInstance(Character target)
+        {
+            return new SkillInstance(this,target);
+        }
 
         /// <summary>
         /// 蓝耗
@@ -172,19 +252,19 @@ namespace HealerSimulator
         /// <summary>
         /// 实际CD
         /// </summary>
-        public float CD { get => CDDefault / Caster.Speed; }
+        public float CD => CDDefault / Caster.Speed;
 
         private float cdRelease = -1f;
         /// <summary>
         /// 剩余CD 小于0表示冷却好了
         /// </summary>
-        public float CDRelease { get { return cdRelease; } set { PropChanged(); cdRelease = value; } }
+        public float CDRelease { get => cdRelease; set { cdRelease = value; PropChanged(); } }
 
         private float castingRelease = -1f;
         /// <summary>
         /// 剩余施法时间
         /// </summary>
-        public float CastingRelease { get { return castingRelease; } set { PropChanged(); castingRelease = value; } }
+        public float CastingRelease { get => castingRelease; set { castingRelease = value; PropChanged(); } }
 
         /// <summary>
         /// 默认施法时间,负数表示为瞬发技能
@@ -209,11 +289,11 @@ namespace HealerSimulator
         /// <summary>
         /// 判断是否是瞬发技能
         /// </summary>
-        public bool IsInstant { get { return (CastingDefaultInterval < 0); } }
+        public bool IsInstant => (CastingDefaultInterval < 0);
 
         /// <summary>
         /// 实际施法时间
         /// </summary>
-        public float CastingInterval { get => CastingDefaultInterval / Caster.Speed; }
+        public float CastingInterval => CastingDefaultInterval / Caster.Speed;
     }
 }

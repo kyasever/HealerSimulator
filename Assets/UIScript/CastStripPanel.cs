@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 这个同样不适合触发式,改成轮询
+/// 主要的问题在于没有分级,要是有一层子脚本绑定SKill就好办了 一层绑Character 一层绑Skill
 /// </summary>
 public class CastStripPanel : MonoBehaviour
 {

@@ -13,13 +13,14 @@ namespace HealerSimulator
             Skill s = new Skill()
             {
                 Caster = c,
-                Atk = (int)(30 * miuti),
+                Power = (int)(-30 * miuti),
                 CDDefault = 2f,
                 skillName = "地震",
                 CDRelease = 1f,
-                skillDiscription = "短间隔全体AOE"
+                skillDiscription = "短间隔全体AOE",
+                DebugOutLevel = Skill.DebugType.None,
             };
-            s.OnCastEvent += CastSkill1;
+            s.CastSctipt += CastSkill1;
             return s;
         }
 
@@ -28,14 +29,14 @@ namespace HealerSimulator
             Skill s = new Skill()
             {
                 Caster = c,
-                Atk = (int)(30 * miuti),
+                Power = (int)(-30 * miuti),
                 CDDefault = 2f,
                 skillName = "重击",
                 skillDiscription = "对坦克造成大量伤害"
 
             };
             s.CDRelease = s.CD / 2;
-            s.OnCastEvent += CastSkill2;
+            s.CastSctipt += CastSkill2;
             return s;
         }
 
@@ -44,13 +45,14 @@ namespace HealerSimulator
             Skill s = new Skill()
             {
                 Caster = c,
-                Atk = (int)(450 * miuti),
+                Power = (int)(-450 * miuti),
                 CDDefault = 20f,
                 skillName = "流火",
                 skillDiscription = "随机点名造成大量伤害",
+
             };
             s.CDRelease = s.CD;
-            s.OnCastEvent += CastSkill3;
+            s.CastSctipt += CastSkill3;
             return s;
         }
 
@@ -65,7 +67,7 @@ namespace HealerSimulator
             int hp = (int)(25000 * (1 + difficultyLevel / 10f));
             Character c = new Character
             {
-                CharacterName = "BOSS",
+                CharacterName = "按部就班的便当王",
                 MaxHP = hp
             };
             c.HP = c.MaxHP;
@@ -98,7 +100,7 @@ namespace HealerSimulator
 
         private static void CastSkill1(Skill s, GameMode game)
         {
-            SkillCaster.CastAOESkill(s, game.TeamCharacters);
+            SkillCaster.CastMultiSkill(s, game.TeamCharacters);
         }
 
         private static void CastSkill2(Skill s, GameMode game)
@@ -116,7 +118,7 @@ namespace HealerSimulator
                     list.Add(c);
                 }
             }
-            SkillCaster.CastAOESkill(s, list);
+            SkillCaster.CastMultiSkill(s, list);
         }
 
         /// <summary>
@@ -157,13 +159,11 @@ namespace HealerSimulator
             }
             foreach (Skill s in c.SkillList)
             {
-                s.CDRelease -= Time.deltaTime;
                 if (s.CDRelease < 0)
                 {
-                    s.OnCastEvent.Invoke(s, game);
+                    s.CastSctipt.Invoke(s, game);
                     s.CDRelease = s.CD;
                 }
-
             }
 
         }

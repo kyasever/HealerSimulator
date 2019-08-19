@@ -42,7 +42,7 @@ public class SkillHUD : DataBinding<Skill>,IPointerEnterHandler,IPointerExitHand
         TooltipRightTopLabel.text = s.MPCost.ToString();
         TooltipBottomLabel.text = s.skillDiscription;
         //这是一个走cd技能,当进入cd的时候,转圈显示的是技能的CD
-        if(s.CDRelease > 0)
+        if(s.CDRelease >= 0)
         {
             ReleaseTimeLabel.gameObject.SetActive(true);
             ReleaseTimeLabel.text = s.CDRelease.ToString("F1");

@@ -35,6 +35,7 @@ namespace HealerSimulator
             }
             TickPerSecond();
         }
+
         public virtual void TickPerSecond()
         {
 
@@ -55,6 +56,49 @@ namespace HealerSimulator
                 c = null;
                 return;
             }
+
+            //正在进入CD的技能进行相应结算
+            foreach (Skill s in c.SkillList)
+            {
+                if (s.CDRelease > 0)
+                {
+                    s.CDRelease -= Time.deltaTime;
+                }
+            }
+
+            //驱动BUFF的持续时间和跳的时间
+            foreach (BUFF buff in c.Buffs)
+            {
+                bool flag = false;
+                //持续时间没了移除 小于0说明持续时间无限
+                if(buff.DefaultTime > 0)
+                {
+                    flag = true;
+                    buff.ReleaseTime -= Time.deltaTime;
+                    if(buff.ReleaseTime < 0)
+                    {
+                        c.Buffs.Remove(buff);
+                    }
+                }
+                //周期性效果生效,吃急速效果
+                if(buff.DefaultHot > 0)
+                {
+                    flag = true;
+                    buff.ReleaseHot -= Time.deltaTime;
+                    if(buff.ReleaseHot < 0)
+                    {
+                        buff.OnHot();
+                        buff.ReleaseHot = buff.DefaultHot / c.Speed;
+                    }
+                }
+                //光环也没周期的就不更新了
+                if(flag)
+                {
+                    buff.PropChanged();
+                }
+
+            }
+
             //驱动每帧事件
             Update();
         }
@@ -96,12 +140,12 @@ namespace HealerSimulator
             c.AP = c.MaxAP;
             c.Evasion = 1.5f - difficultyLevel * 0.1f;
 
-            c.SkillList.Add(PlayerSKill.CreateSkillP1(c));
-            c.SkillList.Add(PlayerSKill.CreateSkillP2(c));
-            c.SkillList.Add(PlayerSKill.CreateSkillP3(c));
-            c.SkillList.Add(PlayerSKill.CreateSkillP4(c));
-            c.SkillList.Add(PlayerSKill.CreateSkillP5(c));
-            c.SkillList.Add(PlayerSKill.CreateSkillP6(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP1(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP2(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP3(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP4(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP5(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP6(c));
             new PlayerController(c);
             return c;
         }
@@ -124,14 +168,7 @@ namespace HealerSimulator
         /// </summary>
         public override void Update()
         {
-            //减少CD
-            foreach (Skill s in c.SkillList)
-            {
-                if (s.CDRelease > 0)
-                {
-                    s.CDRelease -= Time.deltaTime;
-                }
-            }
+
 
             //推动施法进度条,当技能施法时间结束时,释放这个技能
             if (c.IsCasting)
@@ -142,7 +179,7 @@ namespace HealerSimulator
                     //技能出手 如果出手的时候已经死掉了,那么不能出手
                     if (game.FocusCharacter.IsAlive)
                     {
-                        c.CastingSkill.OnCastEvent.Invoke(c.CastingSkill, game);
+                        c.CastingSkill.CastSctipt.Invoke(c.CastingSkill, game);
                     }
 
                     c.CastingSkill = null;
@@ -175,7 +212,7 @@ namespace HealerSimulator
                         {
                             c.CastingSkill = null;
                         }
-                        s.OnCastEvent.Invoke(s, game);
+                        s.CastSctipt.Invoke(s, game);
                         c.CommonTime = c.CommonInterval;
                     }
                     //读条技能,开始读条
@@ -254,35 +291,35 @@ namespace HealerSimulator
             return c;
         }
 
-        public int DPS = 100;
+        public int PerHit = 100;
+        
+        public float HitSpeed = 1f;
+
+
 
         public NPCController(Character c,int dps) : base(c)
         {
-            DPS = dps;
+            PerHit = dps;
+            s = SkillBuilder.CreateSkillNPC1(c, HitSpeed);
+            c.SkillList.Add(s);
         }
 
-        public override void TickPerSecond()
-        {
-            if (c == null)
-            {
-                return;
-            }
+        private Skill s;
 
+        public override void Update()
+        {
             if (!game.InBattle)
             {
                 return;
             }
 
-
-            int damage = (int)Random.Range(DPS * 0.5f,DPS * 1.5f);
-            GameMode.Instance.Boss.HP -= damage;
-            Skada.Instance.AddRecord(new SkadaRecord()
+            //这个技能冷却好了就用. 输出有一定随机因素
+            if(s.CDRelease < 0)
             {
-                Accept = GameMode.Instance.Boss,
-                Source = c,
-                UseSkill = null,
-                Value = -damage
-            });
+                int damage = (int)Random.Range(PerHit * 0.5f, PerHit * 1.5f);
+                s.Power = -damage;
+                s.Cast();
+            }
         }
     }
 

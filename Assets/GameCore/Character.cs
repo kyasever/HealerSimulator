@@ -15,12 +15,14 @@ namespace HealerSimulator
         RangeDPS,
     }
 
+    /// <summary>
+    /// 数据源.继承这个接口来给UI系统通知产生了变化和刷新 对接DataBinding<>
+    /// </summary>
     public interface IDataBinding
     {
         List<Action> OnChangeEvent { get; set; }
         void PropChanged();
     }
-
 
     /// <summary>
     /// 角色类 主要负责处理游戏逻辑和数据,和显示完全脱钩,和Destroy完全脱钩,没有生命周期,只有数据,和处理数据的函数
@@ -29,6 +31,12 @@ namespace HealerSimulator
     /// </summary>
     public class Character : IDataBinding
     {
+        public Character()
+        {
+            Buffs = new BUFFContainer(this);
+        }
+
+
         /// <summary>
         /// 当角色产生变化的时候触发通知
         /// </summary>
@@ -36,7 +44,11 @@ namespace HealerSimulator
 
         public void PropChanged()
         {
-            foreach(var a in OnChangeEvent)
+            if (OnChangeEvent.Count == 0)
+            {
+                return;
+            }
+            foreach (var a in OnChangeEvent)
             {
                 a.Invoke();
             }
@@ -49,10 +61,7 @@ namespace HealerSimulator
 
         public TeamDuty Duty = TeamDuty.MeleeDPS;
 
-        public Character()
-        {
 
-        }
 
         /// <summary>
         /// 闪避率,这个值通常取决于这个角色的操作水平,只有可以被闪避的伤害才可以触发闪避效果
@@ -208,42 +217,9 @@ namespace HealerSimulator
         public int MaxAP = 0;
 
 
-        /// <summary>
-        /// BUFF状态栏
-        /// </summary>
-        public List<BUFF> Buffs = new List<BUFF>();
+        public BUFFContainer Buffs;
     }
 
-    public class BUFF
-    {
-        /// <summary>
-        /// 显示小图标,不超过一个字
-        /// </summary>
-        public string Icon = "爆";
 
-        public float TotalTime = 0f;
-
-        public float ReleaseTime = 0f;
-
-        public string Description = "";
-
-        //当被挂上的时候触发一次
-        public void OnAdd()
-        {
-
-        }
-        //每秒结算的时候触发一次
-        public void PerSecond()
-        {
-
-        }
-        //当结束的时候触发一次
-        public void OnEnd()
-        {
-
-        }
-
-
-    }
 
 }

@@ -2232,6 +2232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24937d080c3fcd04e95a2994964da2dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pool: {fileID: 0}
   Coins: 10000
   Exp: 10000
   ShopTrans: {fileID: 0}
