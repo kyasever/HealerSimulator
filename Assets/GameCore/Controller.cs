@@ -370,15 +370,8 @@ namespace HealerSimulator
                 return;
             }
             //全死光了
-            if (game.TeamCharacters.Count == game.TeamDead.Count)
+            if (game.TeamCharacters.Count == game.TeamDead.Count || !game.Boss.IsAlive)
             {
-                Debug.Log("游戏结束");
-                game.InBattle = false;
-                Global.Instance.GameEndPanel.gameObject.SetActive(true);
-            }
-            else if (!game.Boss.IsAlive)
-            {
-                Debug.Log("游戏胜利");
                 game.InBattle = false;
                 Global.Instance.GameEndPanel.gameObject.SetActive(true);
             }

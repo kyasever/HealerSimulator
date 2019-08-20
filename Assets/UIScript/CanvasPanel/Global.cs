@@ -30,6 +30,13 @@ public class Global : MonoBehaviour
 
     public GameEndPanel GameEndPanel;
 
+
+    public void EndGameWithBtn()
+    {
+        game.InBattle = false;
+        Global.Instance.GameEndPanel.gameObject.SetActive(true);
+    }
+
     // Start is called before the first frame update
     void Awake()
     {

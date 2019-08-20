@@ -80,7 +80,6 @@ public class GameEndPanel : MonoBehaviour
 
     private void ReturnScene()
     {
-
         Global.Instance.EndGame();
     }
 }
