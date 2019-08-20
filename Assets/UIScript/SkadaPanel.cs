@@ -1,5 +1,6 @@
 ﻿using HealerSimulator;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 //这个比较特殊,它是每秒钟更新一次.所以不绑定任何数据
@@ -49,7 +50,11 @@ public class SkadaPanel : MonoBehaviour
             SkadaHUD com = list[i].GetComponent<SkadaHUD>();
             com.gameObject.SetActive(true);
             com.NameLabel.text = data[i].Key.CharacterName;
-            com.AmountLabel.text = (data[i].Value.Damage).ToString();
+
+            int dmg = data[i].Value.Damage;
+            float dps = dmg / GameMode.Instance.BattleTime;
+            StringBuilder sb = new StringBuilder().AppendFormat("{0}[{1}]", dmg, dps.ToString("F1"));
+            com.AmountLabel.text = sb.ToString();
             com.Slider.FillAmount = (float)data[i].Value.Damage / maxData;
         }
     }

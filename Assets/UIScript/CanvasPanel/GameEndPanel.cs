@@ -80,7 +80,7 @@ public class GameEndPanel : MonoBehaviour
 
     private void ReturnScene()
     {
-        game.Clear();
+
         Global.Instance.EndGame();
     }
 }

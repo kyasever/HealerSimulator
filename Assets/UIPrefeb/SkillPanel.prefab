@@ -36,8 +36,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.51100004}
   m_AnchorMax: {x: 0, y: 0.51100004}
-  m_AnchoredPosition: {x: 853, y: -113}
-  m_SizeDelta: {x: 690.5, y: 88.8}
+  m_AnchoredPosition: {x: 897.39, y: -113}
+  m_SizeDelta: {x: 779.26, y: 88.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5557680277767924951
 CanvasRenderer:
@@ -56,7 +56,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5557680277767924956}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -2095666955, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
@@ -68,7 +68,7 @@ MonoBehaviour:
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 64, y: 64}
-  m_Spacing: {x: 32, y: 0}
+  m_Spacing: {x: 16, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
 --- !u!114 &4743278904102565632
@@ -83,8 +83,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 124ce2290d31a3248bf0db3f5a95f442, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SkillHUDPrefeb: {fileID: 3375342122812913742, guid: bf27ab7ff0af21d46910a02b3f6142db,
-    type: 3}
 --- !u!114 &418467829351202174
 MonoBehaviour:
   m_ObjectHideFlags: 0

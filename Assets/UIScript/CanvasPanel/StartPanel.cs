@@ -15,13 +15,26 @@ public class StartPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Dropdown.options = new List<Dropdown.OptionData>() { new Dropdown.OptionData("关卡1") };
+        Dropdown.options = new List<Dropdown.OptionData>() { new Dropdown.OptionData("BOSS1"), new Dropdown.OptionData("BOSS2") };
+        Dropdown.value = 1;
         Button.onClick.AddListener(OnClick);
     }
 
     public void OnClick()
     {
-        Global.Instance.NewGame(Convert.ToInt32(Field.text));
+        int diff = 0;
+        int level = 1;
+        try
+        {
+            diff = Convert.ToInt32(Field.text);
+            level = Dropdown.value+1;
+            Global.Instance.NewGame(Convert.ToInt32(Field.text), level);
+        }
+        catch
+        {
+            Debug.LogError("输入不合法");
+        }
+
     }
 
     // Update is called once per frame

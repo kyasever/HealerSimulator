@@ -49,16 +49,16 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
     public Text hpLabel;
     public KSlider hpSlider;
 
-    private Image panelImage;
+    public GameObject selectImage;
 
     void Awake()
     {
-        panelImage = GetComponent<Image>();
         pool = GetComponent<ObjectPool>();
     }
 
-    public Color selectColor; 
-    public Color unSelectColor;
+    public ObjectPool BuffPool;
+
+
 
     public override void Refresh()
     {
@@ -75,6 +75,15 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
         //先设定va 再设定 max 自然 val 就没有设定上去了
         hpSlider.MaxValue = character.MaxHP;
         hpSlider.Value = character.HP;
+
+        int count = character.Buffs.Count;
+        List<GameObject> list = BuffPool.GetInstantiate(count);
+        int i = 0;
+        foreach(BUFF buff in character.Buffs)
+        {
+            list[i].GetComponent<BUFFHUD>().Binding(buff);
+            i++;
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -83,11 +92,11 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
         {
             GameMode.Instance.FocusCharacter = sourceData;
         }
-        panelImage.color = selectColor;
+        selectImage.SetActive(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        panelImage.color = unSelectColor;
+        selectImage.SetActive(false);
     }
 }

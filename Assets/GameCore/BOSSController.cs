@@ -8,52 +8,35 @@ namespace HealerSimulator
     /// </summary>
     public class BossController : Controller
     {
-        public Skill CreateSkillB1(float miuti)
+        /// <summary>
+        /// 返回创建好的BOSS 和BOSS的技能伤害倍率
+        /// </summary>
+        public static Character CreateBossNormal(int diff,int hpMax,string name,out float m)
         {
-            Skill s = new Skill()
+            //创建并调整Boss的属性 HP每10层翻一倍
+            int hp = (int)(hpMax * (1 + diff / 10f));
+            Character c = new Character
             {
-                Caster = c,
-                Power = (int)(-30 * miuti),
-                CDDefault = 2f,
-                skillName = "地震",
-                CDRelease = 1f,
-                skillDiscription = "短间隔全体AOE",
-                DebugOutLevel = Skill.DebugType.None,
+                CharacterName = "按部就班的便当王",
+                MaxHP = hp,
+                Crit = 0f,//BOSS可别爆击了
             };
-            s.CastSctipt += CastSkill1;
-            return s;
-        }
+            c.HP = c.MaxHP;
 
-        public Skill CreateSkillB2(float miuti)
-        {
-            Skill s = new Skill()
+            float miuti = (float)System.Math.Sqrt(1 + diff * 0.1);
+            //如果难度倍率超过4(急速倍率超过2) 那么急速锁定2 伤害倍率无限提高
+            if (miuti > 2)
             {
-                Caster = c,
-                Power = (int)(-30 * miuti),
-                CDDefault = 2f,
-                skillName = "重击",
-                skillDiscription = "对坦克造成大量伤害"
-
-            };
-            s.CDRelease = s.CD / 2;
-            s.CastSctipt += CastSkill2;
-            return s;
-        }
-
-        public Skill CreateSkillB3(float miuti)
-        {
-            Skill s = new Skill()
+                miuti = (1 + diff * 0.1f) / 2;
+                c.Speed = 2;
+            }
+            else
             {
-                Caster = c,
-                Power = (int)(-450 * miuti),
-                CDDefault = 20f,
-                skillName = "流火",
-                skillDiscription = "随机点名造成大量伤害",
+                c.Speed = miuti;
+            }
 
-            };
-            s.CDRelease = s.CD;
-            s.CastSctipt += CastSkill3;
-            return s;
+            m = miuti; 
+            return c;
         }
 
         /// <summary>
@@ -61,19 +44,9 @@ namespace HealerSimulator
         /// 好像又回到了wa的结构
         /// </summary>
         /// <returns></returns>
-        public static BossController CreateBoss(int difficultyLevel)
+        public static BossController CreateBoss1(int difficultyLevel)
         {
-            //创建并调整Boss的属性
-            int hp = (int)(25000 * (1 + difficultyLevel / 10f));
-            Character c = new Character
-            {
-                CharacterName = "按部就班的便当王",
-                MaxHP = hp
-            };
-            c.HP = c.MaxHP;
-
-            float miuti = (float)System.Math.Sqrt(1 + difficultyLevel * 0.1);
-            c.Speed = miuti;
+            Character c = CreateBossNormal(difficultyLevel, 25000, "按部就班的便当王", out float miuti);
 
             //添加并绑定Boss的技能
             c.SkillList = new List<Skill>();
@@ -81,12 +54,36 @@ namespace HealerSimulator
             //添加Controller
             BossController controller = new BossController(c);
 
-            c.SkillList.Add(controller.CreateSkillB1(miuti));
-            c.SkillList.Add(controller.CreateSkillB2(miuti));
-            c.SkillList.Add(controller.CreateSkillB3(miuti));
+            c.SkillList.Add(SkillBuilder.CreateSkillB1(c,miuti));
+            c.SkillList.Add(SkillBuilder.CreateSkillB2(c,miuti));
+            c.SkillList.Add(SkillBuilder.CreateSkillB3(c,miuti));
 
             return controller;
         }
+
+        /// <summary>
+        /// 由对应的控制器类负责创建对应的角色实例
+        /// 好像又回到了wa的结构
+        /// </summary>
+        /// <returns></returns>
+        public static BossController CreateBoss2(int difficultyLevel)
+        {
+            Character c = CreateBossNormal(difficultyLevel, 20000, "有狂暴的二号王", out float miuti);
+
+            //添加并绑定Boss的技能
+            c.SkillList = new List<Skill>();
+
+            //添加Controller
+            BossController controller = new BossController(c);
+
+            c.SkillList.Add(SkillBuilder.CreateBOSS2_1(c, miuti));
+            c.SkillList.Add(SkillBuilder.CreateBOSS2_2(c, miuti));
+            c.SkillList.Add(SkillBuilder.CreateBOSS2_3(c, miuti));
+            c.SkillList.Add(SkillBuilder.CreateBOSS2_4(c, miuti));
+
+            return controller;
+        }
+
 
         /// <summary>
         /// 难度等级每增加10 boss的输出增加1倍
@@ -97,54 +94,6 @@ namespace HealerSimulator
         {
 
         }
-
-        private static void CastSkill1(Skill s, GameMode game)
-        {
-            SkillCaster.CastMultiSkill(s, game.TeamCharacters);
-        }
-
-        private static void CastSkill2(Skill s, GameMode game)
-        {
-            SkillCaster.CastSingleSkill(s, GetTank(game));
-        }
-
-        private static void CastSkill3(Skill s, GameMode game)
-        {
-            List<Character> list = new List<Character>();
-            foreach (Character c in game.TeamCharacters)
-            {
-                if (c.IsAlive && c.CanHit(0f))
-                {
-                    list.Add(c);
-                }
-            }
-            SkillCaster.CastMultiSkill(s, list);
-        }
-
-        /// <summary>
-        /// 获得一个坦克单位,如果没有,那么打第一个人
-        /// </summary>
-        private static Character GetTank(GameMode game)
-        {
-            foreach (Character v in game.TeamCharacters)
-            {
-                if (v.Duty == TeamDuty.Tank)
-                {
-                    return v;
-                }
-            }
-
-            foreach (Character v in game.TeamCharacters)
-            {
-                if (v.IsAlive)
-                {
-                    return v;
-                }
-            }
-
-            return null;
-        }
-
 
         //卡cd释放技能
         public override void Update()
@@ -165,7 +114,6 @@ namespace HealerSimulator
                     s.CDRelease = s.CD;
                 }
             }
-
         }
     }
 }

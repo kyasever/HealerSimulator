@@ -28,7 +28,7 @@ public class ObjectPool : MonoBehaviour
 
     private void Create()
     {
-        GameObject obj = Instantiate(GamePrefeb, PoolNode.transform);
+        GameObject obj = Instantiate(GamePrefeb, PoolNode);
         ObjPoolSleep.Add(obj);
         obj.SetActive(false);
     }

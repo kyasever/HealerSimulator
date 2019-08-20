@@ -15,6 +15,10 @@ public class DataBinding<T> : MonoBehaviour where T : class, IDataBinding
     /// </summary>
     public virtual void Binding(T source)
     {
+        if(source == null)
+        {
+            return;
+        }
         if (sourceData == null)
         {
             sourceData = source;

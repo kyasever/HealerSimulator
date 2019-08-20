@@ -26,13 +26,18 @@ using UnityEngine;
  *      优化BOSS 的技能说明
  * 游戏性更新:
  *      游戏机制 BUFF 通过BUFF实现
+ *      爆击 造成二倍效果
+ *      取消了闪避属性.现在BOSS1的3技能默认对两个单位造成伤害
  *      技能 真言术: 盾 增加护盾,可以抵挡伤害
- *      技能 神圣之光 瞬发+hot 
+ *      技能 神圣之光:瞬发+hot
+ *      技能 嗜血: 群体增加强度
+ *      队友有了攻速和爆击机制,进行了属性调整
  *      新的BOSS 真正的一关
  * 
  * 1.6版本 队友
  * TODO:
  *      主题:队友,选择不同的队友可以有不同的游戏体验 存档功能(1.5版本已经加入测试版,1.6正式实装)
+ *      BUFF 和Skill 取消递增id设定,改为唯一ID设定,然后把带ID的都创建到一起.
  *      
  * 
  * 未来更新 进化 自定义自己的角色
@@ -92,7 +97,43 @@ namespace HealerSimulator
 
         public List<Character> TeamCharacters;
 
-        public List<Character> DeadCharacters = new List<Character>();
+
+        public void PropChanged()
+        {
+            TeamAlive = new List<Character>();
+            TeamDead = new List<Character>();
+            TeamDic = new Dictionary<TeamDuty, List<Character>>();
+            TeamDic.Add(TeamDuty.Healer, new List<Character>());
+            TeamDic.Add(TeamDuty.MeleeDPS, new List<Character>());
+            TeamDic.Add(TeamDuty.RangeDPS, new List<Character>());
+            TeamDic.Add(TeamDuty.Tank, new List<Character>());
+
+            foreach (var v in TeamCharacters)
+            {
+                if (v.IsAlive)
+                {
+                    TeamAlive.Add(v);
+                    TeamDic[v.Duty].Add(v);
+                }
+                else
+                {
+                    TeamDead.Add(v);
+                }
+            }
+
+            foreach (var v in OnChangeEvent)
+            {
+                v.Invoke();
+            }
+        }
+        //由PropChanged维护
+        public List<Character> TeamAlive;
+        public List<Character> TeamDead;
+        public Dictionary<TeamDuty, List<Character>> TeamDic;
+
+
+
+
 
 
         public int DifficultyLevel;
@@ -106,29 +147,30 @@ namespace HealerSimulator
             InBattle = false;
             BattleTime = 0f;
             TeamCharacters = new List<Character>();
-            DeadCharacters = new List<Character>();
+            TeamDead = new List<Character>();
             Boss = null;
             Player = null;
             FocusCharacter = null;
             UpdateEvent = null;
             UpdatePerSecendEvent = null;
+
         }
 
-        public void InitGame(int difficultyLevel)
+        public void InitGame(int diff,int level)
         {
-            LevelName = "第一关";
-            DifficultyLevel = difficultyLevel;
+            LevelName = "第"+level.ToString()+"关";
+            DifficultyLevel = diff;
             
             //创建小队
             TeamCharacters = new List<Character>();
 
-            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Mage));
-            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Tank));
-            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Saber));
-            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Warrior));
+            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Mage,diff));
+            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Tank, diff));
+            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Saber, diff));
+            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Warrior, diff));
             
             //创建玩家
-            Character c = PlayerController.CreatePlayer(difficultyLevel);
+            Character c = PlayerController.CreatePlayer(diff);
             TeamCharacters.Add(c);
 
             //加满血
@@ -137,8 +179,17 @@ namespace HealerSimulator
                 v.HP = v.MaxHP;
             }
 
-            //创建BOSS
-            Boss = BossController.CreateBoss(difficultyLevel).c;
+            if(level == 1)
+            {
+                //创建BOSS
+                Boss = BossController.CreateBoss1(diff).c;
+            }
+            else if (level == 2)
+            {
+                //创建BOSS
+                Boss = BossController.CreateBoss2(diff).c;
+            }
+
 
             //创建游戏控制器
             new GameContrtoller();
@@ -147,10 +198,7 @@ namespace HealerSimulator
             Player = c;
             FocusCharacter = Player;
 
-            foreach(var v in OnChangeEvent)
-            {
-                v.Invoke();
-            }
+            PropChanged();
         }
 
     }

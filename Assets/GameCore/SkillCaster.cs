@@ -14,6 +14,27 @@ namespace HealerSimulator
     public static class SkillCaster
     {
         /// <summary>
+        /// 发动无目标技能,结算ＣＤ和蓝耗
+        /// </summary>
+        /// <param name="s"></param>
+        public static void CastToVoid(Skill s)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
+
+            //消耗蓝
+            s.Caster.MP -= s.MPCost;
+
+            //进入CD
+            if (s.CDDefault > 0)
+            {
+                s.CDRelease = s.CD;
+            }
+            //输出结果
+            Debug.Log(sb.ToString());
+        }
+
+        /// <summary>
         /// 向目标发动单体技能
         /// </summary>
         public static void CastSingleSkill(Skill s, Character target)
@@ -23,7 +44,6 @@ namespace HealerSimulator
                 return;
             }
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
 
             //消耗蓝
             s.Caster.MP -= s.MPCost;
@@ -36,8 +56,6 @@ namespace HealerSimulator
             {
                 s.CDRelease = s.CD;
             }
-            //输出结果
-            Debug.Log(sb.ToString());
         }
 
         /// <summary>
@@ -49,8 +67,6 @@ namespace HealerSimulator
             {
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0} 释放了 {1} ", s.Caster.CharacterName, s.skillName);
 
             //消耗蓝
             s.Caster.MP -= s.MPCost;
@@ -58,7 +74,8 @@ namespace HealerSimulator
             //将Skill 转换为SkillInstance 进行下一步结算
             foreach (var target in targets)
             {
-                SkillCalculater.AttackSingle(s.CreateInstance(target));
+                if(target.IsAlive)
+                    SkillCalculater.AttackSingle(s.CreateInstance(target));
             }
 
             //进入CD
@@ -66,8 +83,6 @@ namespace HealerSimulator
             {
                 s.CDRelease = s.CD;
             }
-            //输出结果
-            Debug.Log(sb.ToString());
         }
     }
 
@@ -107,6 +122,11 @@ namespace HealerSimulator
             //结算伤害
             s.Target.HP += s.Value;
 
+            if (s.ID < 0)
+            {
+                return;
+            }
+
             OutResult(s);
 
         }
@@ -119,6 +139,7 @@ namespace HealerSimulator
         public static void OutResult(SkillInstance s)
         {
             Skill skill = FindSkill(s.ID);
+
             Skada.Instance.AddRecord(new SkadaRecord() { Accept = s.Target, Source = s.Caster, UseSkill = skill, Value = s.Value });
             if(skill.DebugOutLevel == Skill.DebugType.DebugLog)
             {

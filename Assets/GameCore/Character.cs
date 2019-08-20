@@ -62,26 +62,6 @@ namespace HealerSimulator
         public TeamDuty Duty = TeamDuty.MeleeDPS;
 
 
-
-        /// <summary>
-        /// 闪避率,这个值通常取决于这个角色的操作水平,只有可以被闪避的伤害才可以触发闪避效果
-        /// 取值范围0-1 1为完全闪避. 通常玩家控制角色闪避率为1,NPC闪避率较低
-        /// </summary>
-        public float Evasion = 0f;
-
-
-        /// <summary>
-        /// 返回是否可以命中该单位的判定,取决于该单位的闪避,和命中
-        /// </summary>
-        /// <param name="hit">命中修正 0为无修正 -1为 -100%命中 1为+100%命中</param>
-        /// <returns></returns>
-        public bool CanHit(float hit)
-        {
-            float f = Evasion - hit;
-            float d = UnityEngine.Random.Range(0,1f);
-            return d > f;
-        }
-
         /// <summary>
         /// 是否可以爆击的判定
         /// </summary>
@@ -142,7 +122,15 @@ namespace HealerSimulator
         /// <summary>
         /// 公cd剩余时间
         /// </summary>
-        public float CommonTime { get { return commonTime; }set { commonTime = value; PropChanged(); } }
+        public float CommonTime { get { return commonTime; }set { commonTime = value; PropChanged(); PropSkill(); } }
+
+        private void PropSkill()
+        {
+            foreach(var v in SkillList)
+            {
+                v.PropChanged();
+            }
+        }
 
         /// <summary>
         /// 保存对应键位对应的技能

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace HealerSimulator
 {
@@ -15,17 +16,24 @@ namespace HealerSimulator
         /// <summary>
         /// BUFF状态栏
         /// </summary>
-        public Dictionary<int, BUFF> Buffs = new Dictionary<int, BUFF>();
+        public Dictionary<string, BUFF> Buffs = new Dictionary<string, BUFF>();
+
+        public int Count { get { return Buffs.Count; } }
 
         /// <summary>
         /// 添加一个Buff
         /// </summary>
         public void Add(BUFF buff)
         {
-            buff.Character = c;
-            if (Buffs.ContainsKey(buff.ID))
+            buff.Target = c;
+            if (Buffs.ContainsKey(buff.Name))
             {
-                if (buff.Num < buff.MaxNum)
+                //已经到了最大叠加层数,只刷新时间
+                if(buff.Num == buff.MaxNum)
+                {
+                    Buffs[buff.Name].ReleaseTime = buff.DefaultTime;
+                }
+                else if (buff.Num < buff.MaxNum)
                 {
                     buff.Num++;
                     buff.OnNumChanged();
@@ -33,7 +41,7 @@ namespace HealerSimulator
             }
             else
             {
-                Buffs.Add(buff.ID, buff);
+                Buffs.Add(buff.Name, buff);
                 buff.ReleaseTime = buff.DefaultTime;
                 buff.OnAdd();
             }
@@ -45,14 +53,21 @@ namespace HealerSimulator
         /// </summary>
         public void Remove(BUFF buff)
         {
-            if (Buffs.ContainsKey(buff.ID))
+            if (Buffs.ContainsKey(buff.Name))
             {
-                Buffs.Remove(buff.ID);
+                Buffs.Remove(buff.Name);
                 buff.OnRemove();
             }
             c.PropChanged();
         }
 
+        /// <summary>
+        /// 死的时候清除所有BUFF 不进行别的操作
+        /// </summary>
+        public void Clear()
+        {
+            Buffs.Clear();
+        }
 
          public IEnumerator GetEnumerator()
          {
@@ -63,12 +78,137 @@ namespace HealerSimulator
          }
     }
 
+    public class PTeamBuff : BUFF
+    {
+        public PTeamBuff(Character caster) :base( caster)
+        {
+            Name = "神圣强化";
+            Description = "增加30%强度等级";
+            DefaultTime = 20f;
+        }
+
+        public override void OnAttack(SkillInstance s)
+        {
+            s.Value = (int)(s.Value * 1.3f);
+        }
+    }
+
+    public class HotBuff : BUFF
+    {
+        Skill skill;
+
+        public HotBuff(Character caster,float releaseTime,float hotTime,int power) : base(caster)
+        {
+            Name = "持续治疗";
+            Description = "持续回复生命";
+            DefaultTime = releaseTime;
+            DefaultHot = hotTime;
+            ReleaseHot = 1f;
+
+            skill = new Skill()
+            {
+                Caster = Caster,
+                Power = power,
+                skillName = "HOT",
+            };
+        }
+
+        public override void OnHot()
+        {
+            SkillCaster.CastSingleSkill(skill, Target);
+        }
+        public override void OnRemove()
+        {
+            SkillCaster.CastSingleSkill(skill, Target);
+        }
+    }
+
+    /// <summary>
+    /// 结束之后造成伤害
+    /// </summary>
+    public class BoomDeBUFF : BUFF
+    {
+        Skill skill;
+        public BoomDeBUFF(string name,Character caster, float releaseTime, int power) : base(caster)
+        {
+            Name = name;
+            Description = "结束后造成伤害";
+            IsPositive = false;
+            DefaultTime = releaseTime;
+
+            skill = new Skill()
+            {
+                Caster = Caster,
+                Power = power,
+                skillName = "Boom",
+            };
+        }
+
+        public override void OnRemove()
+        {
+            SkillCaster.CastSingleSkill(skill, Target);
+        }
+    }
+
+    public class ShieldBUFF : BUFF
+    {
+        int power;
+
+        public ShieldBUFF(Character caster, float releaseTime, int power) : base(caster)
+        {
+            Name = "护盾护盾";
+            Description = "抵抗伤害";
+            this.power = power;
+            DefaultTime = releaseTime;
+        }
+
+        public override void OnBeHit(SkillInstance s)
+        {
+            if(s.Value < -power)
+            {
+                Debug.Log("抵挡了:" + power.ToString());
+                s.Value -= power;
+                power = 0;
+            }
+            else if(s.Value < 0)
+            {
+                Debug.Log("抵挡了:" + s.Value);
+                power += s.Value;
+                s.Value = 0;
+            }
+            if (power <= 0)
+            {
+                needRemove = true;
+            }
+        }
+    }
+
     public class BUFF : IDataBinding
     {
+        public BUFF(Character caster)
+        {
+            Caster  = caster;
+        }
+
         /// <summary>
-        /// BUFF 属于的单位
+        /// 将这个位置放置为true,则会被系统移除掉.自己在判定中不能移除自己
         /// </summary>
-        public Character Character;
+        public bool needRemove = false;
+
+        /// <summary>
+        /// 是否是增益BUFF,决定一部分显示问题
+        /// </summary>
+        public bool IsPositive = true;
+
+        /// <summary>
+        /// BUFF 的施法者
+        /// </summary>
+        public Character Caster;
+
+        /// <summary>
+        /// BUFF 被加给了谁
+        /// </summary>
+        public Character Target;
 
         public List<Action> OnChangeEvent { get; set; } = new List<Action>();
 
@@ -84,19 +224,6 @@ namespace HealerSimulator
             }
         }
 
-
-        public static int GlobalID = 1;
-
-        public int ID = 1;
-        //每被创建一次 ID都会自增
-        public BUFF()
-        {
-            ID = GlobalID;
-            GlobalID++;
-        }
-
-
-        public bool IsPositive = true;
 
         //显示层数
         public int Num = 1;
@@ -146,7 +273,7 @@ namespace HealerSimulator
         /// <summary>
         /// 当发动攻击时,检测自己身上的BUFF
         /// </summary>
-        public void OnAttack(SkillInstance s)
+        public virtual void OnAttack(SkillInstance s)
         {
 
         }
@@ -162,7 +289,7 @@ namespace HealerSimulator
         /// <summary>
         /// 当被攻击时,检测BUFF
         /// </summary>
-        public void OnBeHit(SkillInstance s)
+        public virtual void OnBeHit(SkillInstance s)
         {
 
         }
@@ -170,10 +297,10 @@ namespace HealerSimulator
         /// <summary>
         /// 当消失的时候触发
         /// </summary>
-        public void OnRemove()
+        public virtual void OnRemove()
         {
 
         }
-
+        
     }
 }

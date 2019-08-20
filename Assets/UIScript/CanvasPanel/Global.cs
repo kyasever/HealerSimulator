@@ -40,9 +40,9 @@ public class Global : MonoBehaviour
     }
 
 
-    public void NewGame(int diff)
+    public void NewGame(int diff,int level)
     {
-        game.InitGame(diff);
+        game.InitGame(diff,level);
         StartCanvas.SetActive(false);
         game.InBattle = true;
         //SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
@@ -50,6 +50,9 @@ public class Global : MonoBehaviour
 
     public void EndGame()
     {
+        game.Clear();
+        GameEndPanel.gameObject.SetActive(false);
+
         StartCanvas.SetActive(true);
         game.InBattle = false;
         //SceneManager.LoadScene("StartScene", LoadSceneMode.Single);

@@ -49,11 +49,12 @@ namespace HealerSimulator
                 return;
             }
 
-            //如果检测到控制的人挂了,那么解除关系
+            //如果检测到控制的人挂了,那么解除关系,清空BUFF
             if (!c.IsAlive)
             {
-                game.DeadCharacters.Add(c);
+                c.Buffs.Clear();
                 c = null;
+                game.PropChanged();
                 return;
             }
 
@@ -66,10 +67,24 @@ namespace HealerSimulator
                 }
             }
 
+            List<BUFF> needRemove = null;
+
             //驱动BUFF的持续时间和跳的时间
             foreach (BUFF buff in c.Buffs)
             {
                 bool flag = false;
+                if(buff.needRemove)
+                {
+                    flag = true;
+                    if (needRemove == null)
+                    {
+                        needRemove = new List<BUFF>();
+                    }
+                    needRemove.Add(buff);
+                    buff.PropChanged();
+                    continue;
+                }
+
                 //持续时间没了移除 小于0说明持续时间无限
                 if(buff.DefaultTime > 0)
                 {
@@ -77,7 +92,11 @@ namespace HealerSimulator
                     buff.ReleaseTime -= Time.deltaTime;
                     if(buff.ReleaseTime < 0)
                     {
-                        c.Buffs.Remove(buff);
+                        if(needRemove == null)
+                        {
+                            needRemove = new List<BUFF>();
+                        }
+                        needRemove.Add(buff);
                     }
                 }
                 //周期性效果生效,吃急速效果
@@ -96,7 +115,14 @@ namespace HealerSimulator
                 {
                     buff.PropChanged();
                 }
+            }
 
+            if(needRemove != null)
+            {
+                foreach(var v in needRemove)
+                {
+                    c.Buffs.Remove(v);
+                }
             }
 
             //驱动每帧事件
@@ -128,7 +154,7 @@ namespace HealerSimulator
                 Stama = 46,
                 Speed = 1.2f,
                 Crit = 0.2f,
-                Inte = 55,
+                Inte = 60,
                 Master = 0f,
                 Defense = 0f,
                 MaxAP = 0,
@@ -138,7 +164,6 @@ namespace HealerSimulator
             c.HP = c.MaxHP;
             c.MP = c.MaxMP;
             c.AP = c.MaxAP;
-            c.Evasion = 1.5f - difficultyLevel * 0.1f;
 
             c.SkillList.Add(SkillBuilder.CreateSkillP1(c));
             c.SkillList.Add(SkillBuilder.CreateSkillP2(c));
@@ -146,6 +171,8 @@ namespace HealerSimulator
             c.SkillList.Add(SkillBuilder.CreateSkillP4(c));
             c.SkillList.Add(SkillBuilder.CreateSkillP5(c));
             c.SkillList.Add(SkillBuilder.CreateSkillP6(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP7(c));
+            c.SkillList.Add(SkillBuilder.CreateSkillP8(c));
             new PlayerController(c);
             return c;
         }
@@ -168,8 +195,6 @@ namespace HealerSimulator
         /// </summary>
         public override void Update()
         {
-
-
             //推动施法进度条,当技能施法时间结束时,释放这个技能
             if (c.IsCasting)
             {
@@ -246,8 +271,10 @@ namespace HealerSimulator
         }
 
 
-        public static Character CreateNPC(NPCType type)
+        public static Character CreateNPC(NPCType type,int diff)
         {
+            //每增加一层难度,队友的血量上限增加3%
+            float miutiHP = 1 + (diff * 0.02f);
             Character c = new Character();
             int dps = 100;
             switch (type)
@@ -255,7 +282,6 @@ namespace HealerSimulator
                 case NPCType.Tank:
                     c.Duty = TeamDuty.Tank;
                     c.CharacterName = "平庸的坦克";
-                    c.Evasion = 0.2f;
                     c.MaxHP = 3200;
                     c.Defense = 0.3f;
                     dps = 50;
@@ -264,29 +290,29 @@ namespace HealerSimulator
                     c.Duty = TeamDuty.RangeDPS;
                     c.CharacterName = "粗心的法师";
                     c.MaxHP = 1760;
-                    c.Evasion = 0.7f;
                     c.Defense = 0f;
-                    dps = 150;
+                    dps = 160;
                     break;
                 case NPCType.Warrior:
                     c.Duty = TeamDuty.MeleeDPS;
                     c.CharacterName = "鲁莽的斗士";
                     c.MaxHP = 2500;
-                    c.Evasion = 0.2f;
                     c.Defense = -0.1f;
-                    dps = 150;
+                    dps = 170;
                     break;
                 case NPCType.Saber:
                     c.Duty = TeamDuty.MeleeDPS;
                     c.CharacterName = "可靠的武士";
                     c.MaxHP = 1800;
-                    c.Evasion = 0.8f;
                     c.Defense = 0f;
+                    c.Crit = 0.3f;
                     dps = 200;
                     break;
                 default:
                     break;
             }
+            c.MaxHP = (int)(c.MaxHP * miutiHP);
+            c.HP = c.MaxHP;
             new NPCController(c, dps);
             return c;
         }
@@ -344,7 +370,7 @@ namespace HealerSimulator
                 return;
             }
             //全死光了
-            if (game.TeamCharacters.Count == game.DeadCharacters.Count)
+            if (game.TeamCharacters.Count == game.TeamDead.Count)
             {
                 Debug.Log("游戏结束");
                 game.InBattle = false;
