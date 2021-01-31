@@ -2,9 +2,6 @@
 import {UnityEngine, PuertsTest, System} from 'csharp'
 import {$ref, $unref, $generic, $promise} from 'puerts'
 
-// 增加自己的类之后, 需要在cs代码中注册一下,然后才能点导出
-let myClass = new PuertsTest.MyClass();
-
 //静态函数
 UnityEngine.Debug.Log('hello world');
 

@@ -12,7 +12,7 @@ namespace PuertsTest
         void Start()
         {
             jsEnv = new JsEnv();
-            jsEnv.Eval("require('MyTest')");
+            jsEnv.Eval("require('QuickStart')");
         }
 
         void OnDestroy()
