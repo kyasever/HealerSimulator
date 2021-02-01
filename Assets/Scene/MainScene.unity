@@ -124,6 +124,36 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &227610337 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3507558709322573692, guid: f1cae495d44ee6049b3239a33dc5a5c0,
+    type: 3}
+  m_PrefabInstance: {fileID: 3507558708441316704}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &227610338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227610337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af4015a00962c4d93a85e42aeb4a4f38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &227610339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227610337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4310793846be4c528b89bc03ea84689, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &306335234 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5654866203826265760, guid: f1cae495d44ee6049b3239a33dc5a5c0,
@@ -180,6 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 465816fcafe062e4a8b8ada1d09197c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Root: {fileID: 227610338}
   ControllerNum: 0
   TeamCharacterCount: 0
   DeathCharacterCount: 0

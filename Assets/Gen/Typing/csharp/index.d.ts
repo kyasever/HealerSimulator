@@ -574,5 +574,20 @@ declare module 'csharp' {
         }
         
     }
+    namespace ReduxPuerts {
+        class Dispatch extends System.Object {
+            public static Root: KUIRoot;
+            public constructor();
+            public static DispatchValue(nodeName: string, key: string, value: string):void;
+            
+        }
+        
+    }
+    
+        class KUIRoot {
+            
+        }
+        
+    
     
 }

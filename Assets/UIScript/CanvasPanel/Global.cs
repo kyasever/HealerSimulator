@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 //这个类是GameMode的驱动类. GameMode本身不进入Unity循环. 使用这个进行驱动
 public class Global : MonoBehaviour
 {
+    public KUIRoot Root;
     public static Global Instance;
 
     //static Global()
@@ -47,9 +48,9 @@ public class Global : MonoBehaviour
     }
 
 
-    public void NewGame(int diff,int level)
+    public void NewGame(int diff, int level)
     {
-        game.InitGame(diff,level);
+        game.InitGame(diff, level);
         StartCanvas.SetActive(false);
         game.InBattle = true;
         //SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
@@ -75,7 +76,7 @@ public class Global : MonoBehaviour
             ControllerNum = game.UpdateEvent.GetInvocationList().Length;
         else
             ControllerNum = 0;
-        if(game.TeamCharacters != null)
+        if (game.TeamCharacters != null)
             TeamCharacterCount = game.TeamCharacters.Count;
 
         if (game.InBattle)

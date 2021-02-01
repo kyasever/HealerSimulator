@@ -321,7 +321,30 @@ namespace PuertsStaticWrap
             }
         }
 
+        [Puerts.MonoPInvokeCallback(typeof(Puerts.V8FunctionCallback))]
+        private static void F_ExtractStackTraceNoAlloc(IntPtr isolate, IntPtr info, IntPtr self, int paramLen, long data)
+        {
+            try
+            {
 
+
+
+                {
+
+                    var argHelper0 = new Puerts.ArgumentHelper((int)data, isolate, info, 0);
+                    var argHelper1 = new Puerts.ArgumentHelper((int)data, isolate, info, 1);
+                    var argHelper2 = new Puerts.ArgumentHelper((int)data, isolate, info, 2);
+
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                Puerts.PuertsDLL.ThrowException(isolate, "c# exception:" + e.Message + ",stack:" + e.StackTrace);
+            }
+        }
 
         [Puerts.MonoPInvokeCallback(typeof(Puerts.V8FunctionCallback))]
         private static void F_Log(IntPtr isolate, IntPtr info, IntPtr self, int paramLen, long data)
@@ -1146,6 +1169,7 @@ namespace PuertsStaticWrap
                     { new Puerts.MethodKey {Name = "DrawRay", IsStatic = true},  F_DrawRay },
                     { new Puerts.MethodKey {Name = "Break", IsStatic = true},  F_Break },
                     { new Puerts.MethodKey {Name = "DebugBreak", IsStatic = true},  F_DebugBreak },
+                    { new Puerts.MethodKey {Name = "ExtractStackTraceNoAlloc", IsStatic = true},  F_ExtractStackTraceNoAlloc },
                     { new Puerts.MethodKey {Name = "Log", IsStatic = true},  F_Log },
                     { new Puerts.MethodKey {Name = "LogFormat", IsStatic = true},  F_LogFormat },
                     { new Puerts.MethodKey {Name = "LogError", IsStatic = true},  F_LogError },

@@ -16,6 +16,7 @@
             jsEnv.AddLazyStaticWrapLoader(typeof(UnityEngine.GameObject), UnityEngine_GameObject_Wrap.GetRegisterInfo);
             jsEnv.AddLazyStaticWrapLoader(typeof(UnityEngine.Object), UnityEngine_Object_Wrap.GetRegisterInfo);
             jsEnv.AddLazyStaticWrapLoader(typeof(System.Delegate), System_Delegate_Wrap.GetRegisterInfo);
+            jsEnv.AddLazyStaticWrapLoader(typeof(ReduxPuerts.Dispatch), ReduxPuerts_Dispatch_Wrap.GetRegisterInfo);
             
         }
     }

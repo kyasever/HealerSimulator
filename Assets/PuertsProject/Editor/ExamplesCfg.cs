@@ -38,6 +38,7 @@ public class ExamplesCfg
                 typeof(GameObject),
                 typeof(UnityEngine.Object),
                 typeof(Delegate),
+                typeof(ReduxPuerts.Dispatch)
             };
         }
     }
