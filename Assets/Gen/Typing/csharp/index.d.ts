@@ -578,9 +578,14 @@ declare module 'csharp' {
         class Dispatch extends System.Object {
             public static Root: KUIRoot;
             public constructor();
-            public static DispatchValue(nodeName: string, key: string, value: string):void;
+            public static add_KEvent(value: ReduxPuerts.KEventDelegate):void;
+            public static remove_KEvent(value: ReduxPuerts.KEventDelegate):void;
+            public static SetValue(nodeName: string, key: string, value: string):void;
+            public static Trigger(action: string, msg: string):void;
             
         }
+        type KEventDelegate = (action: string, msg: string) => void;
+        var KEventDelegate: {new (func: (action: string, msg: string) => void): KEventDelegate;}
         
     }
     

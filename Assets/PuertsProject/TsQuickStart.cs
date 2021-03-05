@@ -16,6 +16,10 @@ namespace PuertsTest
             jsEnv.Eval("require('src/EventManager')");
         }
 
+        void Update()
+        {
+            Dispatch.Trigger("update", "");
+        }
         void OnDestroy()
         {
             jsEnv.Dispose();

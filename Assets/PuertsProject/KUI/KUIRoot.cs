@@ -7,6 +7,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
+/// <summary>
+/// TODO: 这个类应该改一下, 节点是被手动加入树的.
+/// 树直接改静态全局,然后把想要加的都加进去,命名方式使用 . 链接命名法
+/// </summary>
 public class KUIRoot : MonoBehaviour
 {
     /// <summary>
@@ -98,7 +102,11 @@ public class KUIRoot : MonoBehaviour
                 Log.Warning("当前对象{0} 重复添加了节点:{1}", gameObject.name, name);
             }
             else
+            {
+                // Log.Debug($"添加了节点{name}");
                 nodes.Add(name, child.gameObject);
+            }
+
             if (child.childCount != 0)
             {
                 AddNode(child, name);
