@@ -48,10 +48,24 @@ using UnityEngine;
  */
 namespace HealerSimulator
 {
-    //引擎无关,游戏核心部分,暂时不考虑场景管理
-    public class GameMode
+    /// <summary>
+    /// 自定义声明周期,将方法都绑定到生命周期中.
+    /// </summary>
+    public enum Lifecycle
     {
-        #region singlton
+        /// <summary>
+        /// 
+        /// </summary>
+        ControllerUpdate,
+        /// <summary>
+        /// UI更新,通常在一帧的最后进行
+        /// </summary>
+        UIUpdate
+    }
+    //引擎无关,游戏核心部分,暂时不考虑场景管理
+    public class GameMode : MonoBehaviour
+    {
+        #region singleton
         private static readonly GameMode instance = new GameMode();
         public static GameMode Instance
         {
@@ -61,26 +75,26 @@ namespace HealerSimulator
             }
         }
 
+        public Dictionary<Lifecycle, List<Action<GameMode>>> connected = new Dictionary<Lifecycle, List<Action<GameMode>>>();
+
+        /// <summary>
+        /// 向生命周期中绑定一个方法
+        /// </summary>
+        public void Connect(Action<GameMode> action, Lifecycle stage)
+        {
+            if (connected[stage] == null)
+            {
+                connected[stage] = new List<Action<GameMode>>();
+            }
+            connected[stage].Add(action as Action<GameMode>);
+        }
+
+
         private GameMode()
         {
             Clear();
         }
         #endregion
-
-        /// <summary>
-        /// 当GameMode中的数据产生变化的时候进行通知. 然后他们去处理自己的事情
-        /// </summary>
-        public List<Action> OnChangeEvent { get; set; } = new List<Action>();
-
-        /// <summary>
-        /// 每帧触发一次的事件
-        /// </summary>
-        public Action UpdateEvent;
-
-        /// <summary>
-        /// 每秒触发一次的事件
-        /// </summary>
-        public Action UpdatePerSecendEvent;
 
         /// <summary>
         /// 只有当正在战斗中控制器才会进行运作
@@ -97,8 +111,31 @@ namespace HealerSimulator
 
         public List<Character> TeamCharacters;
 
+        //由PropChanged维护
+        public List<Character> TeamAlive;
+        public List<Character> TeamDead;
+        public Dictionary<TeamDuty, List<Character>> TeamDic;
 
-        public void PropChanged()
+
+
+        public int DifficultyLevel;
+
+        public string LevelName;
+
+        public void Clear()
+        {
+            Skada.Instance.Clear();
+
+            InBattle = false;
+            BattleTime = 0f;
+            TeamCharacters = new List<Character>();
+            TeamDead = new List<Character>();
+            Boss = null;
+            Player = null;
+            FocusCharacter = null;
+        }
+
+        void Update()
         {
             TeamAlive = new List<Character>();
             TeamDead = new List<Character>();
@@ -121,54 +158,31 @@ namespace HealerSimulator
                 }
             }
 
-            foreach (var v in OnChangeEvent)
+            if (InBattle)
             {
-                v.Invoke();
+                BattleTime += Time.deltaTime;
+            }
+
+            // 在update的最后触发所有UI更新事件
+            foreach (var action in connected[Lifecycle.UIUpdate])
+            {
+                action(this);
             }
         }
-        //由PropChanged维护
-        public List<Character> TeamAlive;
-        public List<Character> TeamDead;
-        public Dictionary<TeamDuty, List<Character>> TeamDic;
 
-
-
-
-
-
-        public int DifficultyLevel;
-
-        public string LevelName;
-
-        public void Clear()
+        public void InitGame(int diff, int level)
         {
-            Skada.Instance.Clear();
-
-            InBattle = false;
-            BattleTime = 0f;
-            TeamCharacters = new List<Character>();
-            TeamDead = new List<Character>();
-            Boss = null;
-            Player = null;
-            FocusCharacter = null;
-            UpdateEvent = null;
-            UpdatePerSecendEvent = null;
-
-        }
-
-        public void InitGame(int diff,int level)
-        {
-            LevelName = "第"+level.ToString()+"关";
+            LevelName = "第" + level.ToString() + "关";
             DifficultyLevel = diff;
-            
+
             //创建小队
             TeamCharacters = new List<Character>();
 
-            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Mage,diff));
+            TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Mage, diff));
             TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Tank, diff));
             TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Saber, diff));
             TeamCharacters.Add(NPCController.CreateNPC(NPCController.NPCType.Warrior, diff));
-            
+
             //创建玩家
             Character c = PlayerController.CreatePlayer(diff);
             TeamCharacters.Add(c);
@@ -179,7 +193,7 @@ namespace HealerSimulator
                 v.HP = v.MaxHP;
             }
 
-            if(level == 1)
+            if (level == 1)
             {
                 //创建BOSS
                 Boss = BossController.CreateBoss1(diff).c;
@@ -197,8 +211,6 @@ namespace HealerSimulator
             //初始化game设定
             Player = c;
             FocusCharacter = Player;
-
-            PropChanged();
         }
 
     }

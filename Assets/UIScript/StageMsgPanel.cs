@@ -11,13 +11,16 @@ public class StageMsgPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        game = GameMode.Instance;
-        game.OnChangeEvent.Add(Refresh);
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-    private void Refresh()
+    void Refresh(GameMode gameMode)
     {
-        string s = (game.DifficultyLevel * 10).ToString() + "%";
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+        string s = (gameMode.DifficultyLevel * 10).ToString() + "%";
         StringBuilder sb = new StringBuilder().AppendFormat("{0}  游戏难度:{1}  难度加成:{2}", game.LevelName, game.DifficultyLevel, s);
         GetComponent<Text>().text = sb.ToString();
     }

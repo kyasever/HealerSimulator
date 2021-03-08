@@ -12,32 +12,22 @@ public class CastStripPanel : MonoBehaviour
     public Text timeLabel;
     public KSlider sliderCommonCD;
     private CanvasGroup canvasGroup;
-
-
     private GameMode game;
 
-    private void Start()
+    void Start()
     {
         canvasGroup = GetComponent<CanvasGroup>();
 
-        game = GameMode.Instance;
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-    public bool IsInFading = false;
-
-    private void Update()
+    void Refresh(GameMode gameMode)
     {
-        Character c = game.Player;
-        if(c == null)
+        if (!gameObject.activeSelf)
         {
-            //如果条读完了,那么不改变字符,渐隐藏起来
-            if (Utils.FloatEqual(canvasGroup.alpha, 1))
-            {
-                slider.Value = slider.MaxValue;
-                StartCoroutine(Utils.Fade(canvasGroup, 0f, 1f));
-            }
             return;
         }
+        Character c = gameMode.Player;
         Skill s = c.CastingSkill;
         if (s == null)
         {

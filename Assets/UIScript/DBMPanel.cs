@@ -12,19 +12,23 @@ public class DBMPanel : MonoBehaviour
 
     private void Start()
     {
-        game = GameMode.Instance;
-        game.OnChangeEvent.Add(Refresh);
-
         pool = GetComponent<ObjectPool>();
+
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-    public void Refresh()
+    void Refresh(GameMode gameMode)
     {
-        int count = game.Boss.SkillList.Count;
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+        int count = gameMode.Boss.SkillList.Count;
         List<GameObject> list = pool.GetInstantiate(count);
         for (int i = 0; i < count; i++)
         {
-            list[i].GetComponent<DBMHUD>().Binding(game.Boss.SkillList[i]);
+            list[i].GetComponent<DBMHUD>().Refresh(game.Boss.SkillList[i]);
         }
     }
+
 }

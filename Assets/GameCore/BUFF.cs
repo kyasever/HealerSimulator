@@ -29,7 +29,7 @@ namespace HealerSimulator
             if (Buffs.ContainsKey(buff.Name))
             {
                 //已经到了最大叠加层数,只刷新时间
-                if(buff.Num == buff.MaxNum)
+                if (buff.Num == buff.MaxNum)
                 {
                     Buffs[buff.Name].ReleaseTime = buff.DefaultTime;
                 }
@@ -45,7 +45,6 @@ namespace HealerSimulator
                 buff.ReleaseTime = buff.DefaultTime;
                 buff.OnAdd();
             }
-            c.PropChanged();
         }
 
         /// <summary>
@@ -58,7 +57,6 @@ namespace HealerSimulator
                 Buffs.Remove(buff.Name);
                 buff.OnRemove();
             }
-            c.PropChanged();
         }
 
         /// <summary>
@@ -69,18 +67,18 @@ namespace HealerSimulator
             Buffs.Clear();
         }
 
-         public IEnumerator GetEnumerator()
-         {
-            foreach(var kv in Buffs)
+        public IEnumerator GetEnumerator()
+        {
+            foreach (var kv in Buffs)
             {
                 yield return kv.Value;
             }
-         }
+        }
     }
 
     public class PTeamBuff : BUFF
     {
-        public PTeamBuff(Character caster) :base( caster)
+        public PTeamBuff(Character caster) : base(caster)
         {
             Name = "神圣强化";
             Description = "增加30%强度等级";
@@ -97,7 +95,7 @@ namespace HealerSimulator
     {
         Skill skill;
 
-        public HotBuff(Character caster,float releaseTime,float hotTime,int power) : base(caster)
+        public HotBuff(Character caster, float releaseTime, float hotTime, int power) : base(caster)
         {
             Name = "持续治疗";
             Description = "持续回复生命";
@@ -129,7 +127,7 @@ namespace HealerSimulator
     public class BoomDeBUFF : BUFF
     {
         Skill skill;
-        public BoomDeBUFF(string name,Character caster, float releaseTime, int power) : base(caster)
+        public BoomDeBUFF(string name, Character caster, float releaseTime, int power) : base(caster)
         {
             Name = name;
             Description = "结束后造成伤害";
@@ -164,13 +162,13 @@ namespace HealerSimulator
 
         public override void OnBeHit(SkillInstance s)
         {
-            if(s.Value < -power)
+            if (s.Value < -power)
             {
                 Debug.Log("抵挡了:" + power.ToString());
                 s.Value -= power;
                 power = 0;
             }
-            else if(s.Value < 0)
+            else if (s.Value < 0)
             {
                 Debug.Log("抵挡了:" + s.Value);
                 power += s.Value;
@@ -183,11 +181,11 @@ namespace HealerSimulator
         }
     }
 
-    public class BUFF : IDataBinding
+    public class BUFF : IData
     {
         public BUFF(Character caster)
         {
-            Caster  = caster;
+            Caster = caster;
         }
 
         /// <summary>
@@ -301,6 +299,6 @@ namespace HealerSimulator
         {
 
         }
-        
+
     }
 }

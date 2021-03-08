@@ -54,7 +54,6 @@ namespace HealerSimulator
             {
                 c.Buffs.Clear();
                 c = null;
-                game.PropChanged();
                 return;
             }
 
@@ -73,7 +72,7 @@ namespace HealerSimulator
             foreach (BUFF buff in c.Buffs)
             {
                 bool flag = false;
-                if(buff.needRemove)
+                if (buff.needRemove)
                 {
                     flag = true;
                     if (needRemove == null)
@@ -86,13 +85,13 @@ namespace HealerSimulator
                 }
 
                 //持续时间没了移除 小于0说明持续时间无限
-                if(buff.DefaultTime > 0)
+                if (buff.DefaultTime > 0)
                 {
                     flag = true;
                     buff.ReleaseTime -= Time.deltaTime;
-                    if(buff.ReleaseTime < 0)
+                    if (buff.ReleaseTime < 0)
                     {
-                        if(needRemove == null)
+                        if (needRemove == null)
                         {
                             needRemove = new List<BUFF>();
                         }
@@ -100,26 +99,26 @@ namespace HealerSimulator
                     }
                 }
                 //周期性效果生效,吃急速效果
-                if(buff.DefaultHot > 0)
+                if (buff.DefaultHot > 0)
                 {
                     flag = true;
                     buff.ReleaseHot -= Time.deltaTime;
-                    if(buff.ReleaseHot < 0)
+                    if (buff.ReleaseHot < 0)
                     {
                         buff.OnHot();
                         buff.ReleaseHot = buff.DefaultHot / c.Speed;
                     }
                 }
                 //光环也没周期的就不更新了
-                if(flag)
+                if (flag)
                 {
                     buff.PropChanged();
                 }
             }
 
-            if(needRemove != null)
+            if (needRemove != null)
             {
-                foreach(var v in needRemove)
+                foreach (var v in needRemove)
                 {
                     c.Buffs.Remove(v);
                 }
@@ -150,20 +149,14 @@ namespace HealerSimulator
         {
             Character c = new Character()
             {
-                //人物的基础属性
-                Stama = 46,
                 Speed = 1.2f,
                 Crit = 0.2f,
-                Inte = 60,
-                Master = 0f,
                 Defense = 0f,
-                MaxAP = 0,
                 CharacterName = "完美的操纵者",
                 Description = "玩家控制单位",
             };
             c.HP = c.MaxHP;
             c.MP = c.MaxMP;
-            c.AP = c.MaxAP;
 
             c.SkillList.Add(SkillBuilder.CreateSkillP1(c));
             c.SkillList.Add(SkillBuilder.CreateSkillP2(c));
@@ -204,7 +197,7 @@ namespace HealerSimulator
                     //技能出手 如果出手的时候已经死掉了,那么不能出手
                     if (game.FocusCharacter.IsAlive)
                     {
-                        c.CastingSkill.CastSctipt.Invoke(c.CastingSkill, game);
+                        c.CastingSkill.CastScript.Invoke(c.CastingSkill, game);
                     }
 
                     c.CastingSkill = null;
@@ -237,7 +230,7 @@ namespace HealerSimulator
                         {
                             c.CastingSkill = null;
                         }
-                        s.CastSctipt.Invoke(s, game);
+                        s.CastScript.Invoke(s, game);
                         c.CommonTime = c.CommonInterval;
                     }
                     //读条技能,开始读条
@@ -271,7 +264,7 @@ namespace HealerSimulator
         }
 
 
-        public static Character CreateNPC(NPCType type,int diff)
+        public static Character CreateNPC(NPCType type, int diff)
         {
             //每增加一层难度,队友的血量上限增加3%
             float miutiHP = 1 + (diff * 0.02f);
@@ -318,12 +311,12 @@ namespace HealerSimulator
         }
 
         public int PerHit = 100;
-        
+
         public float HitSpeed = 1f;
 
 
 
-        public NPCController(Character c,int dps) : base(c)
+        public NPCController(Character c, int dps) : base(c)
         {
             PerHit = dps;
             s = SkillBuilder.CreateSkillNPC1(c, HitSpeed);
@@ -340,7 +333,7 @@ namespace HealerSimulator
             }
 
             //这个技能冷却好了就用. 输出有一定随机因素
-            if(s.CDRelease < 0)
+            if (s.CDRelease < 0)
             {
                 int damage = (int)Random.Range(PerHit * 0.5f, PerHit * 1.5f);
                 s.Power = -damage;

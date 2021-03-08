@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class SkillHUD : DataBinding<Skill>,IPointerEnterHandler,IPointerExitHandler
+public class SkillHUD : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Image Icon;
     public Text SkillNameLabel;
@@ -32,29 +32,28 @@ public class SkillHUD : DataBinding<Skill>,IPointerEnterHandler,IPointerExitHand
         StartCoroutine(Utils.Fade(TooltipCanvas, 0f, 0.5f));
     }
 
-    public override void Refresh()
+    public void Refresh(Skill s)
     {
-        Skill s = sourceData;
         //KeyTextLabel.text = s.Key.ToString();
         SkillNameLabel.text = s.skillName;
         KeyTextLabel.text = s.Key.ToString();
         TooltipLeftTopLabel.text = s.skillName;
         TooltipRightTopLabel.text = s.MPCost.ToString();
-        TooltipBottomLabel.text = s.skillDiscription;
+        TooltipBottomLabel.text = s.skillDescription;
         //这是一个走cd技能,当进入cd的时候,转圈显示的是技能的CD
-        if(s.CDRelease >= 0)
+        if (s.CDRelease >= 0)
         {
             ReleaseTimeLabel.gameObject.SetActive(true);
             ReleaseTimeLabel.text = s.CDRelease.ToString("F1");
-            Icon.fillAmount =  1 - s.CDRelease / s.CD;
+            Icon.fillAmount = 1 - s.CDRelease / s.CD;
         }
         else
         {
             ReleaseTimeLabel.gameObject.SetActive(false);
             Icon.fillAmount = 1 - (s.Caster.CommonTime / s.Caster.CommonInterval);
         }
-        
-        if(!s.CanCast)
+
+        if (!s.CanCast)
         {
             ReleaseTimeLabel.gameObject.SetActive(false);
             Icon.fillAmount = 0;

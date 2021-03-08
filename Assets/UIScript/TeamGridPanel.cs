@@ -13,18 +13,22 @@ public class TeamGridPanel : MonoBehaviour
 
     void Start()
     {
-        game = GameMode.Instance;
-        game.OnChangeEvent.Add(Refresh);
         pool = GetComponent<ObjectPool>();
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-    private void Refresh()
+    void Refresh(GameMode gameMode)
     {
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
         int count = game.TeamCharacters.Count;
         List<GameObject> list = pool.GetInstantiate(count);
-        for(int i = 0;i<count;i++)
+        for (int i = 0; i < count; i++)
         {
-            list[i].GetComponent<CharacterHUD>().Binding(game.TeamCharacters[i]);
+            list[i].GetComponent<CharacterHUD>().Refresh(game.TeamCharacters[i]);
         }
     }
+
 }

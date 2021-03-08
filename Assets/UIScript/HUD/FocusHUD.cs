@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class FocusHUD : DataBinding<Character>
+public class FocusHUD : MonoBehaviour
 {
     public Text nameLabel;
     public Text hpLabel;
@@ -18,15 +18,13 @@ public class FocusHUD : DataBinding<Character>
     void Start()
     {
         panelImage = GetComponent<Image>();
-        GameMode.Instance.OnChangeEvent.Add(() => { Binding(GameMode.Instance.FocusCharacter); });
-    }
-
-
-    public override void Refresh()
-    {
-        nameLabel.text = sourceData.CharacterName;
-        hpLabel.text = Utils.GetNString(sourceData.HP, sourceData.MaxHP);
-        hpSlider.Value = sourceData.HP;
-        hpSlider.MaxValue = sourceData.MaxHP;
+        GameMode.Instance.Connect((GameMode game) =>
+        {
+            var sourceData = GameMode.Instance.FocusCharacter;
+            nameLabel.text = sourceData.CharacterName;
+            hpLabel.text = Utils.GetNString(sourceData.HP, sourceData.MaxHP);
+            hpSlider.Value = sourceData.HP;
+            hpSlider.MaxValue = sourceData.MaxHP;
+        }, Lifecycle.UIUpdate);
     }
 }

@@ -63,9 +63,9 @@ namespace HealerSimulator
                 CDDefault = 12f,
                 MPCost = 200,
                 skillName = "神圣之光",
-                skillDiscription = "瞬发,治疗600,并持续恢复",
+                skillDescription = "瞬发,治疗600,并持续恢复",
             };
-            s.CastSctipt += CastHolyLight;
+            s.CastScript += CastHolyLight;
             return s;
         }
         //治疗术
@@ -79,9 +79,9 @@ namespace HealerSimulator
                 CastingDefaultInterval = 2.5f,
                 MPCost = 30,
                 skillName = "治疗术",
-                skillDiscription = "恢复300点HP",
+                skillDescription = "恢复300点HP",
             };
-            s.CastSctipt += CastToFocus;
+            s.CastScript += CastToFocus;
             return s;
         }
         //强效治疗
@@ -95,9 +95,9 @@ namespace HealerSimulator
                 CastingDefaultInterval = 3f,
                 MPCost = 150,
                 skillName = "强效治疗",
-                skillDiscription = "强而有效的单体治疗",
+                skillDescription = "强而有效的单体治疗",
             };
-            s.CastSctipt += CastToFocus;
+            s.CastScript += CastToFocus;
             return s;
         }
         //祷言
@@ -111,9 +111,9 @@ namespace HealerSimulator
                 CastingDefaultInterval = 3.5f,
                 MPCost = 150,
                 skillName = "治疗祷言",
-                skillDiscription = "有效的群体治疗",
+                skillDescription = "有效的群体治疗",
             };
-            s.CastSctipt += CastToTeam;
+            s.CastScript += CastToTeam;
             return s;
         }
         //爆发群抬
@@ -128,9 +128,9 @@ namespace HealerSimulator
                 CastingDefaultInterval = -1f,
                 MPCost = 100,
                 skillName = "救赎祷言",
-                skillDiscription = "应急群体治疗",
+                skillDescription = "应急群体治疗",
             };
-            s.CastSctipt += CastToTeam;
+            s.CastScript += CastToTeam;
             return s;
         }
         //攻击技能
@@ -145,9 +145,9 @@ namespace HealerSimulator
                 CastingDefaultInterval = 2.5f,
                 MPCost = -100,
                 skillName = "圣光之箭",
-                skillDiscription = "对BOSS造成伤害,并恢复少量蓝",
+                skillDescription = "对BOSS造成伤害,并恢复少量蓝",
             };
-            s.CastSctipt += CastToBoss;
+            s.CastScript += CastToBoss;
             return s;
         }
         //真言术盾
@@ -162,9 +162,9 @@ namespace HealerSimulator
                 CDDefault = 15f,
                 MPCost = 200,
                 skillName = "真言术盾",
-                skillDiscription = "瞬发,为目标添加护盾,持续10s,可以抵挡600伤害",
+                skillDescription = "瞬发,为目标添加护盾,持续10s,可以抵挡600伤害",
             };
-            s.CastSctipt += CastShield;
+            s.CastScript += CastShield;
             return s;
         }
         //嗜血
@@ -178,9 +178,9 @@ namespace HealerSimulator
                 CDDefault = 300f,
                 MPCost = 300,
                 skillName = "神圣强化",
-                skillDiscription = "为全体友方单位添加神圣强化效果,攻击和治疗强度提升30%",
+                skillDescription = "为全体友方单位添加神圣强化效果,攻击和治疗强度提升30%",
             };
-            s.CastSctipt += CastTeamBuff;
+            s.CastScript += CastTeamBuff;
             return s;
         }
 
@@ -197,10 +197,10 @@ namespace HealerSimulator
                 CDDefault = cd,
                 CDRelease = 0.1f,
                 skillName = caster.CharacterName + "的攻击",
-                skillDiscription = "造成伤害",
+                skillDescription = "造成伤害",
                 DebugOutLevel = Skill.DebugType.None,
             };
-            s.CastSctipt += CastToBoss;
+            s.CastScript += CastToBoss;
             return s;
         }
         #endregion
@@ -215,10 +215,10 @@ namespace HealerSimulator
                 CDDefault = 2f,
                 skillName = "地震",
                 CDRelease = 1f,
-                skillDiscription = "短间隔全体AOE",
+                skillDescription = "短间隔全体AOE",
                 DebugOutLevel = Skill.DebugType.None,
             };
-            s.CastSctipt += CastToTeam;
+            s.CastScript += CastToTeam;
             return s;
         }
 
@@ -230,11 +230,11 @@ namespace HealerSimulator
                 Power = (int)(-1200 * miuti),
                 CDDefault = 20f,
                 skillName = "重击",
-                skillDiscription = "对坦克造成大量伤害"
+                skillDescription = "对坦克造成大量伤害"
 
             };
             s.CDRelease = s.CD / 2;
-            s.CastSctipt += CastToTank;
+            s.CastScript += CastToTank;
             return s;
         }
 
@@ -302,11 +302,11 @@ namespace HealerSimulator
                 Power = (int)(-450 * miuti),
                 CDDefault = 20f,
                 skillName = "流火",
-                skillDiscription = "随机点名造成大量伤害",
+                skillDescription = "随机点名造成大量伤害",
 
             };
             s.CDRelease = s.CD;
-            s.CastSctipt += CastToTeamRandom2;
+            s.CastScript += CastToTeamRandom2;
             return s;
         }
         #endregion
@@ -320,12 +320,12 @@ namespace HealerSimulator
                 Power = (int)(-150 * miuti),
                 CDDefault = 2f,
                 skillName = "普通攻击",
-                
-                skillDiscription = "对坦克造成少量单体伤害",
+
+                skillDescription = "对坦克造成少量单体伤害",
                 DebugOutLevel = Skill.DebugType.None,
             };
             s.CDRelease = s.CD;
-            s.CastSctipt += CastToTank;
+            s.CastScript += CastToTank;
             return s;
         }
 
@@ -337,10 +337,10 @@ namespace HealerSimulator
                 Power = (int)(-2000 * miuti),
                 CDDefault = 25f,
                 skillName = "毁灭重击",
-                skillDiscription = "对坦克造成毁灭性的打击",
+                skillDescription = "对坦克造成毁灭性的打击",
             };
-            s.CDRelease = s.CD/2;
-            s.CastSctipt += CastToTank;
+            s.CDRelease = s.CD / 2;
+            s.CastScript += CastToTank;
             return s;
         }
 
@@ -355,7 +355,7 @@ namespace HealerSimulator
                 List<Character> list = game.TeamDic[TeamDuty.MeleeDPS];
                 list[UnityEngine.Random.Range(0, list.Count - 1)].Buffs.Add(debuff);
             }
-            else if(game.TeamDic[TeamDuty.Tank].Count > 0)
+            else if (game.TeamDic[TeamDuty.Tank].Count > 0)
             {
                 List<Character> list = game.TeamDic[TeamDuty.Tank];
                 list[UnityEngine.Random.Range(0, list.Count - 1)].Buffs.Add(debuff);
@@ -367,7 +367,7 @@ namespace HealerSimulator
                 List<Character> list = game.TeamDic[TeamDuty.RangeDPS];
                 list[UnityEngine.Random.Range(0, list.Count - 1)].Buffs.Add(debuff);
             }
-            else if(game.TeamDic[TeamDuty.Healer].Count > 0)
+            else if (game.TeamDic[TeamDuty.Healer].Count > 0)
             {
                 List<Character> list = game.TeamDic[TeamDuty.Healer];
                 list[UnityEngine.Random.Range(0, list.Count - 1)].Buffs.Add(debuff);
@@ -382,10 +382,10 @@ namespace HealerSimulator
                 Power = (int)(-1200 * miuti),
                 CDDefault = 35f,
                 skillName = "幽灵火",
-                skillDiscription = "随机点名1近1远,10s后造成大量伤害",
+                skillDescription = "随机点名1近1远,10s后造成大量伤害",
             };
             s.CDRelease = s.CD;
-            s.CastSctipt += CastBOSS2_3;
+            s.CastScript += CastBOSS2_3;
             return s;
         }
 
@@ -403,10 +403,10 @@ namespace HealerSimulator
                 CustomInt = (int)(-400 * miuti),
                 CDDefault = 16f,
                 skillName = "烈焰灼烧",
-                skillDiscription = "AOE高额伤害,每秒伤害提高1%",
+                skillDescription = "AOE高额伤害,每秒伤害提高1%",
             };
             s.CDRelease = s.CD;
-            s.CastSctipt += CastBOSS2_4;
+            s.CastScript += CastBOSS2_4;
             return s;
         }
         #endregion
@@ -442,7 +442,7 @@ namespace HealerSimulator
     /// <summary>
     /// 技能类. 考虑使用继承进行扩展. 技能的释放是一个权限很大的函数,它可以获得游戏中的所有的数据并决定该干什么.
     /// </summary>
-    public class Skill : IDataBinding
+    public class Skill
     {
         public enum DebugType
         {
@@ -476,7 +476,7 @@ namespace HealerSimulator
         }
 
         public string skillName = "技能名";
-        public string skillDiscription = "技能效果";
+        public string skillDescription = "技能效果";
 
         /// <summary>
         /// 和伤害还是治疗无关,单纯的为正就是加血 为负就是减血
@@ -497,14 +497,14 @@ namespace HealerSimulator
         /// 技能被释放时执行的操作,通常使用静态函数进行托管,特定技能需要编写特定的静态函数进行处理
         /// 参数Skill    代表攻击者  
         /// </summary>
-        public Action<Skill, GameMode> CastSctipt;
+        public Action<Skill, GameMode> CastScript;
 
         /// <summary>
         /// 不太好... CastSctipt?.Invoke(this,GameMode.Instance);
         /// </summary>
         public void Cast()
         {
-            CastSctipt?.Invoke(this, GameMode.Instance);
+            CastScript?.Invoke(this, GameMode.Instance);
         }
 
         public SkillInstance CreateInstance(Character target)

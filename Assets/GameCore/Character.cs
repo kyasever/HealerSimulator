@@ -16,42 +16,13 @@ namespace HealerSimulator
     }
 
     /// <summary>
-    /// 数据源.继承这个接口来给UI系统通知产生了变化和刷新 对接DataBinding<>
+    /// 角色类 
     /// </summary>
-    public interface IDataBinding
-    {
-        List<Action> OnChangeEvent { get; set; }
-        void PropChanged();
-    }
-
-    /// <summary>
-    /// 角色类 主要负责处理游戏逻辑和数据,和显示完全脱钩,和Destroy完全脱钩,没有生命周期,只有数据,和处理数据的函数
-    /// 不管是什么角色,都有这里面所有的属性,只是处理方式不同.
-    /// hpmax = 1000 + sta * 20 mpmax = 500 + int * 30
-    /// </summary>
-    public class Character : IDataBinding
+    public class Character : IData
     {
         public Character()
         {
             Buffs = new BUFFContainer(this);
-        }
-
-
-        /// <summary>
-        /// 当角色产生变化的时候触发通知
-        /// </summary>
-        public List<Action> OnChangeEvent { get; set; } = new List<Action>();
-
-        public void PropChanged()
-        {
-            if (OnChangeEvent.Count == 0)
-            {
-                return;
-            }
-            foreach (var a in OnChangeEvent)
-            {
-                a.Invoke();
-            }
         }
 
         /// <summary>
@@ -60,22 +31,6 @@ namespace HealerSimulator
         public SkadaRecord BehitRecord;
 
         public TeamDuty Duty = TeamDuty.MeleeDPS;
-
-
-        /// <summary>
-        /// 是否可以爆击的判定
-        /// </summary>
-        /// <returns></returns>
-        public bool CanCrit()
-        {
-            return UnityEngine.Random.Range(0, 1f) < Crit;
-        }
-
-
-        /// <summary>
-        /// 耐力 提升20血量
-        /// </summary>
-        public int Stama = 150;
 
         /// <summary>
         /// 急速. 取值1+ 2则为2倍速,0.5则为0.5倍速
@@ -88,52 +43,40 @@ namespace HealerSimulator
         public float Crit = 0.2f;
 
         /// <summary>
-        /// 智力 提升蓝上限和回蓝
+        /// 进行一次暴击判定
         /// </summary>
-        public int Inte = 100;
-
-        /// <summary>
-        /// 精通 神秘效果
-        /// </summary>
-        public float Master = 0f;
+        public bool CanCrit()
+        {
+            return UnityEngine.Random.Range(0, 1f) < Crit;
+        }
 
         /// <summary>
         /// 减伤百分比
         /// </summary>
         public float Defense = 0f;
 
-        private Skill castringSkill = null;
         /// <summary>
-        /// 当前正在释放的法术,为null说明当前没有正在释放法术
+        /// 正在释放的法术
         /// </summary>
-        public Skill CastingSkill { get { return castringSkill; } set { castringSkill = value; PropChanged(); } }
+        public Skill CastingSkill = null;
 
         /// <summary>
-        /// 当开始施法时,只有空格可以打断施法.
+        /// 是否正在施法
         /// </summary>
-        public bool IsCasting { get { return CastingSkill != null; } }
+        public bool IsCasting { get { return this.CastingSkill != null; } }
 
         /// <summary>
-        /// 公cd = 1.5s减急速加成
+        /// 公共cd = 1.5s / 急速加成
         /// </summary>
         public float CommonInterval { get { return 1.5f / Speed; } }
 
-        private float commonTime = -1f;
         /// <summary>
         /// 公cd剩余时间
         /// </summary>
-        public float CommonTime { get { return commonTime; }set { commonTime = value; PropChanged(); PropSkill(); } }
-
-        private void PropSkill()
-        {
-            foreach(var v in SkillList)
-            {
-                v.PropChanged();
-            }
-        }
+        public float CommonTime = -1f;
 
         /// <summary>
-        /// 保存对应键位对应的技能
+        /// 持有的技能
         /// </summary>
         public List<Skill> SkillList = new List<Skill>();
 
@@ -156,10 +99,9 @@ namespace HealerSimulator
             get => hp;
             set
             {
-                if(!IsAlive)
+                if (!IsAlive)
                 {
                     hp = 0;
-                    PropChanged();
                     return;
                 }
 
@@ -171,7 +113,6 @@ namespace HealerSimulator
                     hp = 0;
                     IsAlive = false;
                 }
-                PropChanged();
             }
         }
 
@@ -180,7 +121,7 @@ namespace HealerSimulator
         /// <summary>
         /// 当前最大生命
         /// </summary>
-        public int MaxHP { get { return Stama * 20 + 1000; }  set { Stama = (value - 1000) / 20; PropChanged(); } }
+        public int MaxHP = 3000;
 
         private int mp = 0;
         //第二资源条
@@ -196,14 +137,9 @@ namespace HealerSimulator
                 {
                     mp = 0;
                 }
-                PropChanged();
             }
         }
-        public int MaxMP { get { return Inte * 30 + 500; } }
-        //第三资源条
-        public int AP = 0;
-        public int MaxAP = 0;
-
+        public int MaxMP = 3000;
 
         public BUFFContainer Buffs;
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //这个应该绑定GameMode,当GameMode状态发生变化的时候,调用Refresh
-public class BossHPPanel : DataBinding<Character>
+public class BossHPPanel : MonoBehaviour
 {
     public KSlider slider;
     public Text nameLabel;
@@ -14,19 +14,20 @@ public class BossHPPanel : DataBinding<Character>
 
     private GameMode game;
 
-    // Start is called before the first frame update
     void Start()
     {
         sliderCommonCD.Value = 0;
 
-        game = GameMode.Instance;
-        game.OnChangeEvent.Add(() => { Binding(game.Boss); });
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-    //这个方法是没问题的. character添加自己的回调给这个
-    public override void Refresh()
+    void Refresh(GameMode gameMode)
     {
-        Character c = sourceData;
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+        Character c = gameMode.Player;
         slider.Value = c.HP;
         slider.MaxValue = c.MaxHP;
         nameLabel.text = c.CharacterName;

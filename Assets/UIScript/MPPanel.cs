@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MPPanel : DataBinding<Character>
+public class MPPanel : MonoBehaviour
 {
     private GameMode game;
 
@@ -10,21 +10,23 @@ public class MPPanel : DataBinding<Character>
     public Text leftLabel;
     public Text rightLabel;
     private CanvasGroup canvasGroup;
+    public bool IsInFading = false;
 
     // Start is called before the first frame update
     private void Start()
     {
-        game = GameMode.Instance;
-        game.OnChangeEvent.Add(()=> { Binding(game.Player); });
-
         canvasGroup = GetComponent<CanvasGroup>();
+
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-    public bool IsInFading = false;
-
-    public override void Refresh()
+    void Refresh(GameMode gameMode)
     {
-        Character c = sourceData;
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+        Character c = gameMode.Player;
         if (c == null)
         {
             leftLabel.text = "空缺";
@@ -35,4 +37,5 @@ public class MPPanel : DataBinding<Character>
         rightLabel.text = Utils.GetNString(c.MP, c.MaxMP);
         slider.FillAmount = ((float)c.MP / c.MaxMP);
     }
+
 }

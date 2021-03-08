@@ -11,7 +11,7 @@ namespace HealerSimulator
         /// <summary>
         /// 返回创建好的BOSS 和BOSS的技能伤害倍率
         /// </summary>
-        public static Character CreateBossNormal(int diff,int hpMax,string name,out float m)
+        public static Character CreateBossNormal(int diff, int hpMax, string name, out float m)
         {
             //创建并调整Boss的属性 HP每10层翻一倍
             int hp = (int)(hpMax * (1 + diff / 10f));
@@ -35,7 +35,7 @@ namespace HealerSimulator
                 c.Speed = miuti;
             }
 
-            m = miuti; 
+            m = miuti;
             return c;
         }
 
@@ -54,9 +54,9 @@ namespace HealerSimulator
             //添加Controller
             BossController controller = new BossController(c);
 
-            c.SkillList.Add(SkillBuilder.CreateSkillB1(c,miuti));
-            c.SkillList.Add(SkillBuilder.CreateSkillB2(c,miuti));
-            c.SkillList.Add(SkillBuilder.CreateSkillB3(c,miuti));
+            c.SkillList.Add(SkillBuilder.CreateSkillB1(c, miuti));
+            c.SkillList.Add(SkillBuilder.CreateSkillB2(c, miuti));
+            c.SkillList.Add(SkillBuilder.CreateSkillB3(c, miuti));
 
             return controller;
         }
@@ -110,7 +110,7 @@ namespace HealerSimulator
             {
                 if (s.CDRelease < 0)
                 {
-                    s.CastSctipt.Invoke(s, game);
+                    s.CastScript.Invoke(s, game);
                     s.CDRelease = s.CD;
                 }
             }

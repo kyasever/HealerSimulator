@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPointerExitHandler
+public class CharacterHUD : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Transform damegeTextTrans;
 
@@ -31,7 +31,7 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
         obj.transform.localPosition = Vector3.zero;
 
         Text text = obj.GetComponent<Text>();
-        if(record.Value > 0)
+        if (record.Value > 0)
         {
             text.color = Color.blue;
             text.text = "+" + record.Value.ToString();
@@ -41,7 +41,7 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
             text.color = Color.red;
             text.text = record.Value.ToString();
         }
-        coroutine =  StartCoroutine(Utils.FadeAndUp(obj.GetComponent<CanvasGroup>(), 0f, 1.5f,20f,pool));
+        coroutine = StartCoroutine(Utils.FadeAndUp(obj.GetComponent<CanvasGroup>(), 0f, 1.5f, 20f, pool));
     }
 
 
@@ -59,12 +59,12 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
     public ObjectPool BuffPool;
 
 
+    public Character lastCharacter;
 
-    public override void Refresh()
+    public void Refresh(Character character)
     {
-        Character character = sourceData;
-
-        if(character.BehitRecord != null)
+        lastCharacter = character;
+        if (character.BehitRecord != null)
         {
             OnHit(character.BehitRecord);
             character.BehitRecord = null;
@@ -79,18 +79,18 @@ public class CharacterHUD : DataBinding<Character> , IPointerEnterHandler , IPoi
         int count = character.Buffs.Count;
         List<GameObject> list = BuffPool.GetInstantiate(count);
         int i = 0;
-        foreach(BUFF buff in character.Buffs)
+        foreach (BUFF buff in character.Buffs)
         {
-            list[i].GetComponent<BUFFHUD>().Binding(buff);
+            list[i].GetComponent<BUFFHUD>().Refresh(buff);
             i++;
         }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (GameMode.Instance.FocusCharacter != sourceData && sourceData.IsAlive)
+        if (GameMode.Instance.FocusCharacter != lastCharacter && lastCharacter.IsAlive)
         {
-            GameMode.Instance.FocusCharacter = sourceData;
+            GameMode.Instance.FocusCharacter = lastCharacter;
         }
         selectImage.SetActive(true);
     }

@@ -91,7 +91,6 @@ namespace HealerSimulator
         public void AddRecord(SkadaRecord record)
         {
             record.Accept.BehitRecord = record;
-            record.Accept.PropChanged();
 
             recordList.Add(record);
             //说明造成的是伤害

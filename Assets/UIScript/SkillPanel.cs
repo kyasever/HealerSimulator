@@ -6,10 +6,10 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class SkillPanel : DataBinding<Character>
+public class SkillPanel : MonoBehaviour
 {
     private GameMode game;
-    
+
     //public Character sourceCharacter;
 
     private ObjectPool pool;
@@ -17,21 +17,23 @@ public class SkillPanel : DataBinding<Character>
     // Start is called before the first frame update
     void Start()
     {
-        game = GameMode.Instance;
-        game.OnChangeEvent.Add(()=> { Binding(game.Player); });
-
         pool = GetComponent<ObjectPool>();
+        GameMode.Instance.Connect(Refresh, Lifecycle.UIUpdate);
     }
 
-
-    public override void Refresh()
+    void Refresh(GameMode gameMode)
     {
-        Character c = sourceData;
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+        Character c = gameMode.Player;
         int count = c.SkillList.Count;
         List<GameObject> list = pool.GetInstantiate(count);
         for (int i = 0; i < count; i++)
         {
-            list[i].GetComponent<SkillHUD>().Binding(c.SkillList[i]);
+            list[i].GetComponent<SkillHUD>().Refresh(c.SkillList[i]);
         }
     }
+
 }

@@ -10,21 +10,7 @@ public class Global : MonoBehaviour
 {
     public static Global Instance;
 
-    //static Global()
-    //{
-    //    GameObject go = new GameObject("Global");
-    //    DontDestroyOnLoad(go);
-    //    Instance = go.AddComponent<Global>();
-    //}
-
-
     private GameMode game;
-
-    public int ControllerNum;
-
-    public int TeamCharacterCount;
-
-    public int DeathCharacterCount;
 
     public GameObject StartCanvas;
 
@@ -46,10 +32,9 @@ public class Global : MonoBehaviour
         Screen.fullScreen = false;
     }
 
-
-    public void NewGame(int diff,int level)
+    public void NewGame(int diff, int level)
     {
-        game.InitGame(diff,level);
+        game.InitGame(diff, level);
         StartCanvas.SetActive(false);
         game.InBattle = true;
         //SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
@@ -67,28 +52,4 @@ public class Global : MonoBehaviour
 
 
     private float updateTime = 1f;
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (game.UpdateEvent != null)
-            ControllerNum = game.UpdateEvent.GetInvocationList().Length;
-        else
-            ControllerNum = 0;
-        if(game.TeamCharacters != null)
-            TeamCharacterCount = game.TeamCharacters.Count;
-
-        if (game.InBattle)
-            game.BattleTime += Time.deltaTime;
-
-        game.UpdateEvent?.Invoke();
-
-        //每秒钟更新一次
-        updateTime -= Time.deltaTime;
-        if (updateTime < 0)
-        {
-            updateTime = 1f;
-            game.UpdatePerSecendEvent?.Invoke();
-        }
-    }
 }

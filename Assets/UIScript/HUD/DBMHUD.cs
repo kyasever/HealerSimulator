@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Text;
 
-public class DBMHUD : DataBinding<Skill>
+public class DBMHUD : MonoBehaviour
 {
     [HideInInspector]
     public KSlider Slider;
@@ -17,11 +17,9 @@ public class DBMHUD : DataBinding<Skill>
         Slider = GetComponent<KSlider>();
     }
 
-    public override void Refresh()
+    public void Refresh(Skill s)
     {
-        Skill s = sourceData;
-
-        StringBuilder sb = new StringBuilder().Append(s.skillName).Append("[").Append(s.skillDiscription).Append("]");
+        StringBuilder sb = new StringBuilder().Append(s.skillName).Append("[").Append(s.skillDescription).Append("]");
 
         NameLabel.text = sb.ToString();
         AmountLabel.text = Utils.GetNString(s.CDRelease, s.CD);

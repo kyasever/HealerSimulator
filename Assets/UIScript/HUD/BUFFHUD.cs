@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class BUFFHUD : DataBinding<BUFF>, IPointerEnterHandler, IPointerExitHandler
+public class BUFFHUD : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Image Icon;
 
@@ -30,14 +30,12 @@ public class BUFFHUD : DataBinding<BUFF>, IPointerEnterHandler, IPointerExitHand
         StartCoroutine(Utils.Fade(TooltipCanvas, 0f, 0.5f));
     }
 
-    public override void Refresh()
+    public void Refresh(BUFF buff)
     {
-        BUFF buff = sourceData;
-
         ReleaseTimeLabel.text = buff.ReleaseTime.ToString("F1");
         Icon.fillAmount = buff.ReleaseTime / buff.DefaultTime;
 
-        if(buff.IsPositive)
+        if (buff.IsPositive)
         {
             Icon.color = Color.green;
         }
