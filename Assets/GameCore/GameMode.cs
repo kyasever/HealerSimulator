@@ -53,9 +53,7 @@ namespace HealerSimulator
     /// </summary>
     public enum Lifecycle
     {
-        /// <summary>
-        /// 
-        /// </summary>
+        BaseControllerUpdate,
         ControllerUpdate,
         /// <summary>
         /// UI更新,通常在一帧的最后进行
@@ -65,7 +63,7 @@ namespace HealerSimulator
     //引擎无关,游戏核心部分,暂时不考虑场景管理
     public class GameMode : MonoBehaviour
     {
-        #region singleton
+        #region base
         private static readonly GameMode instance = new GameMode();
         public static GameMode Instance
         {
@@ -105,11 +103,14 @@ namespace HealerSimulator
 
         public Character Boss;
 
+        public List<Character> TeamCharacters;
+
+
         public Character Player;
 
         public Character FocusCharacter;
 
-        public List<Character> TeamCharacters;
+
 
         //由PropChanged维护
         public List<Character> TeamAlive;

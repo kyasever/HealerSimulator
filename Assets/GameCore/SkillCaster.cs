@@ -49,7 +49,7 @@ namespace HealerSimulator
             s.Caster.MP -= s.MPCost;
 
             //将Skill 转换为SkillInstance 进行下一步结算
-            SkillCalculater.AttackSingle(s.CreateInstance(target));
+            SkillCalculator.AttackSingle(s.CreateInstance(target));
 
             //进入CD
             if (s.CDDefault > 0)
@@ -75,7 +75,7 @@ namespace HealerSimulator
             foreach (var target in targets)
             {
                 if(target.IsAlive)
-                    SkillCalculater.AttackSingle(s.CreateInstance(target));
+                    SkillCalculator.AttackSingle(s.CreateInstance(target));
             }
 
             //进入CD
@@ -91,7 +91,7 @@ namespace HealerSimulator
     /// 这个类中的方法负责结算SkillInstance类型的Skill 
     /// 包含BUFF加成,减伤,击中结算
     /// </summary>
-    public static class SkillCalculater
+    public static class SkillCalculator
     {
         public static void AttackSingle(SkillInstance s)
         {
@@ -131,10 +131,6 @@ namespace HealerSimulator
 
         }
 
-        public static Skill FindSkill(int id)
-        {
-            return Skill.ID_SKill[id];
-        }
 
         public static void OutResult(SkillInstance s)
         {
